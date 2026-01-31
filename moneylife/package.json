@@ -1,0 +1,21 @@
+{
+  "name": "moneylife",
+  "version": "1.0.0",
+  "description": "Financial literacy game for young children from underserved communities for ElleHacks 2026.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juliajoseph28/moneylife.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/juliajoseph28/moneylife/issues"
+  },
+  "homepage": "https://github.com/juliajoseph28/moneylife#readme"
+}

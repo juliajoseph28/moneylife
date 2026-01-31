@@ -1,0 +1,195 @@
+{
+  "level1": {
+    "name": "Saving Basics",
+    "scenarios": [
+      {
+        "id": "birthday_dinner",
+        "emoji": "🎂",
+        "title": "FRIEND'S BIRTHDAY",
+        "description": "Your best friend is turning 15! They're having dinner at a restaurant.",
+        "prompt": "Wanna come? It's $25",
+        "choices": [
+          {
+            "id": "go",
+            "text": "Yes! I'll go",
+            "emoji": "😊",
+            "cost": 25,
+            "effects": { "balance": -25, "health": 5 },
+            "outcome": {
+              "type": "neutral",
+              "title": "Good Times!",
+              "message": "You had a blast with your friend!",
+              "tip": "Social experiences matter! But track how often you make exceptions."
+            }
+          },
+          {
+            "id": "gift",
+            "text": "I'll send a gift instead",
+            "emoji": "🎁",
+            "cost": 10,
+            "effects": { "balance": -10, "health": 8 },
+            "outcome": {
+              "type": "positive",
+              "title": "Nice Balance!",
+              "message": "Your friend loved the thoughtful gift!",
+              "tip": "Finding the middle ground shows great money skills!"
+            }
+          },
+          {
+            "id": "skip",
+            "text": "Can't make it this time",
+            "emoji": "😅",
+            "cost": 0,
+            "effects": { "balance": 0, "health": -3 },
+            "outcome": {
+              "type": "tradeoff",
+              "title": "Tough Choice",
+              "message": "Your friend understood.",
+              "tip": "Sometimes saying no is the right choice!"
+            }
+          }
+        ]
+      },
+      {
+        "id": "new_game",
+        "emoji": "🎮",
+        "title": "NEW GAME RELEASE",
+        "description": "That game you've been waiting for just came out! Everyone's playing it.",
+        "prompt": "It costs $60. All your friends have it.",
+        "choices": [
+          {
+            "id": "buy_now",
+            "text": "Buy it now!",
+            "emoji": "🎉",
+            "cost": 60,
+            "effects": { "balance": -60, "health": -5 },
+            "outcome": {
+              "type": "negative",
+              "title": "Fun But Costly",
+              "message": "The game is awesome! But your goal got further away.",
+              "tip": "FOMO is real, but games go on sale. Patience pays off!"
+            }
+          },
+          {
+            "id": "wait_sale",
+            "text": "Wait for a sale",
+            "emoji": "⏰",
+            "cost": 0,
+            "effects": { "balance": 0, "health": 10 },
+            "outcome": {
+              "type": "positive",
+              "title": "Patient Gamer!",
+              "message": "You'll get it eventually for less!",
+              "tip": "Games almost always go on sale. Waiting saves 50% or more!"
+            }
+          }
+        ]
+      },
+      {
+        "id": "lunch_money",
+        "emoji": "🍕",
+        "title": "LUNCH WITH FRIENDS",
+        "description": "Your friends are going out for pizza after school.",
+        "prompt": "It'll cost about $12. You packed lunch today.",
+        "choices": [
+          {
+            "id": "go_out",
+            "text": "Go with them",
+            "emoji": "🍕",
+            "cost": 12,
+            "effects": { "balance": -12, "health": 3 },
+            "outcome": {
+              "type": "neutral",
+              "title": "Pizza Time!",
+              "message": "Good times with friends!",
+              "tip": "$12 twice a week = $100/month. Track everything!"
+            }
+          },
+          {
+            "id": "packed_lunch",
+            "text": "Eat my packed lunch",
+            "emoji": "🥪",
+            "cost": 0,
+            "effects": { "balance": 0, "health": 8 },
+            "outcome": {
+              "type": "positive",
+              "title": "Savings Win!",
+              "message": "You still hung out! Just ate your own food.",
+              "tip": "Eating packed lunch saves hundreds per year!"
+            }
+          }
+        ]
+      },
+      {
+        "id": "impulse_buy",
+        "emoji": "🛍️",
+        "title": "COOL FIND",
+        "description": "You're at the mall and see something awesome on sale—50% off!",
+        "prompt": "It's $20 (was $40). You don't need it but want it.",
+        "choices": [
+          {
+            "id": "buy_it",
+            "text": "It's a deal, buy it!",
+            "emoji": "💸",
+            "cost": 20,
+            "effects": { "balance": -20, "health": -5 },
+            "outcome": {
+              "type": "negative",
+              "title": "Impulse Buy",
+              "message": "It's cool, but did you really need it?",
+              "tip": "A sale on something you don't need isn't saving money!"
+            }
+          },
+          {
+            "id": "walk_away",
+            "text": "Walk away",
+            "emoji": "🚶",
+            "cost": 0,
+            "effects": { "balance": 0, "health": 10 },
+            "outcome": {
+              "type": "positive",
+              "title": "Strong Willpower!",
+              "message": "You stayed focused on your goal!",
+              "tip": "Every 'no' to something you don't need is a 'yes' to your goal!"
+            }
+          }
+        ]
+      },
+      {
+        "id": "phone_cracked",
+        "emoji": "📱",
+        "title": "CRACKED SCREEN",
+        "description": "You dropped your phone and the screen cracked. It still works but looks bad.",
+        "prompt": "Repair costs $40. What do you do?",
+        "choices": [
+          {
+            "id": "repair",
+            "text": "Fix it now",
+            "emoji": "🔧",
+            "cost": 40,
+            "effects": { "balance": -40, "health": 3 },
+            "outcome": {
+              "type": "neutral",
+              "title": "Good as New!",
+              "message": "Phone is fixed! But your savings took a hit.",
+              "tip": "This is why emergency funds matter!"
+            }
+          },
+          {
+            "id": "wait",
+            "text": "Use it cracked for now",
+            "emoji": "💪",
+            "cost": 0,
+            "effects": { "balance": 0, "health": 5 },
+            "outcome": {
+              "type": "positive",
+              "title": "Smart Move!",
+              "message": "It's not pretty, but it works!",
+              "tip": "Not every problem needs an immediate fix."
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
