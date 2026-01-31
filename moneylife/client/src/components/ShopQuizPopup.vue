@@ -1,51 +1,60 @@
 <template>
-  <div v-if="show" class="challenge-overlay">
-    <div class="challenge-card">
+  <div v-if="show" class="quiz-overlay">
+    <div class="quiz-card">
       
       <!-- Header -->
-      <div class="challenge-header">
-        <div class="header-icon">🧠</div>
-        <h2 class="header-title">Quiz Time!</h2>
-        <p class="header-subtitle">Answer correctly to earn bonus coins!</p>
+      <div class="quiz-header">
+        <div class="header-icon">🛒</div>
+        <h2 class="header-title">{{ quiz?.title || 'Shop Smart!' }}</h2>
+        <p class="header-subtitle">Pick the best deal!</p>
       </div>
       
-      <!-- Question -->
-      <div class="question-box">
-        <span class="question-emoji">{{ challenge?.emoji || '🤔' }}</span>
-        <p class="question-text">{{ challenge?.question }}</p>
+      <!-- Scenario -->
+      <div class="scenario-box">
+        <p class="scenario-text">{{ quiz?.scenario }}</p>
       </div>
       
       <!-- Options -->
       <div class="options-container">
         <button
-          v-for="option in challenge?.options"
+          v-for="option in quiz?.options"
           :key="option.id"
-          class="option-btn"
+          class="option-card"
           :class="{ 
-            correct: answered && option.correct,
-            wrong: answered && selectedOption === option.id && !option.correct,
+            selected: selectedOption === option.id,
+            correct: answered && option.isBest,
+            wrong: answered && selectedOption === option.id && !option.isBest,
             disabled: answered
           }"
           :disabled="answered"
           @click="selectOption(option)"
         >
-          <span class="option-circle">
-            <span v-if="answered && option.correct">✓</span>
-            <span v-else-if="answered && selectedOption === option.id && !option.correct">✗</span>
-          </span>
-          <span class="option-text">{{ option.text }}</span>
+          <div class="option-header">
+            <span class="option-name">{{ option.name }}</span>
+            <span class="option-price">${{ option.price }}</span>
+          </div>
+          <p class="option-quality">{{ option.quality }}</p>
+          
+          <div v-if="answered && option.isBest" class="best-badge">
+            ✓ BEST DEAL!
+          </div>
         </button>
       </div>
       
-      <!-- Result (shows after answering) -->
+      <!-- Result -->
       <div v-if="answered" class="result-container" :class="isCorrect ? 'correct' : 'wrong'">
-        <div class="result-icon">{{ isCorrect ? '🎉' : '😅' }}</div>
-        <h3 class="result-title">{{ isCorrect ? 'Great Job!' : 'Not quite!' }}</h3>
-        <p class="result-explanation">{{ challenge?.explanation }}</p>
+        <div class="result-icon">{{ isCorrect ? '🎉' : '🤔' }}</div>
+        <h3 class="result-title">{{ isCorrect ? 'Smart Shopper!' : 'Good Try!' }}</h3>
+        <p class="result-tip">{{ quiz?.tip }}</p>
         
-        <div v-if="isCorrect" class="reward-box">
-          <span class="reward-icon">🪙</span>
-          <span class="reward-text">+${{ challenge?.reward }} bonus!</span>
+        <div v-if="isCorrect" class="savings-box">
+          <span class="savings-icon">💰</span>
+          <span class="savings-text">You saved ${{ quiz?.savings }}!</span>
+        </div>
+        
+        <div class="skills-earned">
+          <span class="skill-badge">📋 +5 Planning</span>
+          <span v-if="isCorrect" class="skill-badge">⏰ +3 Patience</span>
         </div>
         
         <button class="btn-continue" @click="handleComplete">
@@ -55,12 +64,10 @@
       </div>
       
       <!-- Penny Helper -->
-      <div class="penny-helper">
+      <div v-if="!answered" class="penny-helper">
         <img src="@/assets/images/kids/pig.png" class="penny-img" alt="Penny" />
         <div class="penny-speech">
-          <p v-if="!answered">Take your time and think! 🤔</p>
-          <p v-else-if="isCorrect">You're so smart! 🌟</p>
-          <p v-else>Don't worry, you'll get it next time! 💪</p>
+          <p>Compare the prices and think about what you really need! 🤔</p>
         </div>
       </div>
       
@@ -73,7 +80,7 @@ import { ref } from 'vue'
 
 const props = defineProps({
   show: Boolean,
-  challenge: Object
+  quiz: Object
 })
 
 const emit = defineEmits(['complete'])
@@ -86,12 +93,12 @@ const selectOption = (option) => {
   if (answered.value) return
   
   selectedOption.value = option.id
-  isCorrect.value = option.correct
+  isCorrect.value = option.isBest
   answered.value = true
 }
 
 const handleComplete = () => {
-  emit('complete', isCorrect.value)
+  emit('complete', isCorrect.value, isCorrect.value ? props.quiz?.savings : 0)
   // Reset for next time
   answered.value = false
   selectedOption.value = null
@@ -100,8 +107,7 @@ const handleComplete = () => {
 </script>
 
 <style scoped>
-/* Overlay */
-.challenge-overlay {
+.quiz-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -116,14 +122,13 @@ const handleComplete = () => {
   backdrop-filter: blur(4px);
 }
 
-/* Card */
-.challenge-card {
+.quiz-card {
   background: white;
   border-radius: 32px;
   padding: 0;
-  max-width: 450px;
+  max-width: 480px;
   width: 100%;
-  border: 4px solid #FFE66D;
+  border: 4px solid #4ECDC4;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: popIn 0.4s ease;
   overflow: hidden;
@@ -135,8 +140,8 @@ const handleComplete = () => {
 }
 
 /* Header */
-.challenge-header {
-  background: linear-gradient(135deg, #6C63FF 0%, #FF6B9D 100%);
+.quiz-header {
+  background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
   padding: 24px;
   text-align: center;
 }
@@ -144,124 +149,120 @@ const handleComplete = () => {
 .header-icon {
   font-size: 48px;
   margin-bottom: 8px;
-  animation: bounce 1s ease-in-out infinite;
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
 }
 
 .header-title {
   margin: 0;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
   color: white;
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
-  text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
 }
 
 .header-subtitle {
   margin: 8px 0 0;
   font-size: 14px;
   color: rgba(255,255,255,0.9);
-  font-weight: 600;
 }
 
-/* Question Box */
-.question-box {
-  padding: 24px;
-  text-align: center;
-  background: linear-gradient(180deg, #FFF8F0 0%, white 100%);
+/* Scenario */
+.scenario-box {
+  padding: 20px 24px;
+  background: #FFF8F0;
+  border-bottom: 3px dashed #FFE66D;
 }
 
-.question-emoji {
-  font-size: 48px;
-  display: block;
-  margin-bottom: 12px;
-}
-
-.question-text {
+.scenario-text {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   color: #2D3436;
-  line-height: 1.4;
+  text-align: center;
+  line-height: 1.5;
 }
 
 /* Options */
 .options-container {
-  padding: 0 24px 24px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.option-btn {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 16px 20px;
+.option-card {
   background: white;
   border: 3px solid #E8E8E8;
   border-radius: 16px;
+  padding: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: left;
+  position: relative;
 }
 
-.option-btn:hover:not(.disabled) {
-  transform: translateX(8px);
+.option-card:hover:not(.disabled) {
+  transform: translateY(-4px);
+  border-color: #4ECDC4;
+  box-shadow: 0 8px 24px rgba(78, 205, 196, 0.2);
+}
+
+.option-card.selected {
   border-color: #6C63FF;
   background: #F8F0FF;
 }
 
-.option-btn.correct {
+.option-card.correct {
   border-color: #4ECDC4;
   background: linear-gradient(135deg, #E8FFF8 0%, #D0F5E8 100%);
 }
 
-.option-btn.wrong {
+.option-card.wrong {
   border-color: #FF6B9D;
   background: linear-gradient(135deg, #FFF0F5 0%, #FFE0E8 100%);
 }
 
-.option-btn.disabled {
+.option-card.disabled {
   cursor: default;
 }
 
-.option-circle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 3px solid #E0E0E0;
+.option-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.option-name {
   font-size: 16px;
-  font-weight: 800;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.option-btn.correct .option-circle {
-  background: #4ECDC4;
-  border-color: #4ECDC4;
-  color: white;
-}
-
-.option-btn.wrong .option-circle {
-  background: #FF6B9D;
-  border-color: #FF6B9D;
-  color: white;
-}
-
-.option-text {
-  flex: 1;
-  font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: #2D3436;
+}
+
+.option-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: #FF6B9D;
+  background: #FFF0F5;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.option-quality {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.best-badge {
+  position: absolute;
+  top: -8px;
+  right: 12px;
+  background: #4ECDC4;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 12px;
 }
 
 /* Result */
@@ -284,8 +285,8 @@ const handleComplete = () => {
 }
 
 .result-container.wrong {
-  background: linear-gradient(135deg, #FFF0F5 0%, #FFE0E8 100%);
-  border: 3px solid #FF6B9D;
+  background: linear-gradient(135deg, #FFF8F0 0%, #FFE8D6 100%);
+  border: 3px solid #FFE66D;
 }
 
 .result-icon {
@@ -301,15 +302,14 @@ const handleComplete = () => {
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
 
-.result-explanation {
+.result-tip {
   margin: 0 0 16px;
   font-size: 14px;
   color: #666;
   line-height: 1.5;
 }
 
-/* Reward Box */
-.reward-box {
+.savings-box {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -325,24 +325,40 @@ const handleComplete = () => {
   50% { transform: scale(1.05); }
 }
 
-.reward-icon {
+.savings-icon {
   font-size: 24px;
 }
 
-.reward-text {
+.savings-text {
   font-size: 18px;
   font-weight: 800;
   color: #2D3436;
 }
 
-/* Continue Button */
+.skills-earned {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.skill-badge {
+  background: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6C63FF;
+  border: 2px solid #6C63FF;
+}
+
 .btn-continue {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: linear-gradient(135deg, #6C63FF 0%, #FF6B9D 100%);
+  background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
   color: white;
   border: none;
   border-radius: 16px;
@@ -355,7 +371,7 @@ const handleComplete = () => {
 
 .btn-continue:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(108, 99, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(78, 205, 196, 0.4);
 }
 
 .btn-arrow {
@@ -376,12 +392,6 @@ const handleComplete = () => {
   width: 50px;
   height: 50px;
   object-fit: contain;
-  animation: wiggle 2s ease-in-out infinite;
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(-5deg); }
-  50% { transform: rotate(5deg); }
 }
 
 .penny-speech {
@@ -390,18 +400,6 @@ const handleComplete = () => {
   border-radius: 12px;
   padding: 10px 14px;
   border: 2px solid #FFE66D;
-  position: relative;
-}
-
-.penny-speech::before {
-  content: '';
-  position: absolute;
-  left: -10px;
-  top: 50%;
-  transform: translateY(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: transparent #FFE66D transparent transparent;
 }
 
 .penny-speech p {

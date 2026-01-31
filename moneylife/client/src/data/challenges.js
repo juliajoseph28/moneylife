@@ -1,108 +1,69 @@
-// src/data/challenges.js
-
-export const challenges = [
+const challenges = [
   {
     id: 1,
-    type: 'quiz',
-    emoji: '🧠',
-    title: 'Quick Quiz!',
-    question: 'What does "saving" mean?',
+    question: "What's the best way to save money?",
+    emoji: "🤔",
     options: [
-      { text: 'Spending all your money', correct: false },
-      { text: 'Keeping money for later', correct: true },
-      { text: 'Giving money away', correct: false }
+      { id: 'a', text: 'Spend everything you earn', correct: false },
+      { id: 'b', text: 'Save a portion of every allowance', correct: true },
+      { id: 'c', text: 'Only save when you feel like it', correct: false }
     ],
-    reward: 5,
-    tip: 'Saving helps you buy bigger things later!'
+    explanation: 'Saving a portion of every allowance builds good habits!',
+    reward: 5
   },
   {
     id: 2,
-    type: 'quiz',
-    emoji: '🤔',
-    title: 'Think Fast!',
-    question: "You found $10! What's the smartest choice?",
+    question: "What is a 'need' vs a 'want'?",
+    emoji: "🛒",
     options: [
-      { text: 'Spend it all on candy', correct: false },
-      { text: 'Save some, spend some', correct: true },
-      { text: 'Hide it under your bed forever', correct: false }
+      { id: 'a', text: 'Needs are things required to live, wants are extras', correct: true },
+      { id: 'b', text: 'They are the same thing', correct: false },
+      { id: 'c', text: 'Wants are more important than needs', correct: false }
     ],
-    reward: 5,
-    tip: 'Balance is key! Save some, spend some wisely.'
+    explanation: 'Needs are essentials like food and shelter. Wants are nice-to-haves!',
+    reward: 5
   },
   {
     id: 3,
-    type: 'quiz',
-    emoji: '🎯',
-    title: 'Goal Check!',
-    question: 'Why is having a savings goal helpful?',
+    question: "Why is it good to wait before buying something expensive?",
+    emoji: "⏰",
     options: [
-      { text: "It makes saving boring", correct: false },
-      { text: 'It helps you stay motivated', correct: true },
-      { text: "Goals don't matter", correct: false }
+      { id: 'a', text: "It's not good, buy it immediately", correct: false },
+      { id: 'b', text: 'You might realize you don\'t really need it', correct: true },
+      { id: 'c', text: 'Things never go on sale', correct: false }
     ],
-    reward: 10,
-    tip: 'Goals give your money a purpose!'
+    explanation: 'Waiting helps you avoid impulse purchases you might regret!',
+    reward: 5
   },
   {
     id: 4,
-    type: 'quiz',
-    emoji: '💳',
-    title: 'Money Smarts!',
-    question: 'What is a budget?',
+    question: "What's a budget?",
+    emoji: "📊",
     options: [
-      { text: 'A plan for your money', correct: true },
-      { text: 'A type of piggy bank', correct: false },
-      { text: 'A way to get free stuff', correct: false }
+      { id: 'a', text: 'A plan for how to spend and save your money', correct: true },
+      { id: 'b', text: 'A type of piggy bank', correct: false },
+      { id: 'c', text: 'A credit card', correct: false }
     ],
-    reward: 5,
-    tip: 'A budget tells your money where to go!'
+    explanation: 'A budget helps you track where your money goes!',
+    reward: 5
   },
   {
     id: 5,
-    type: 'quiz',
-    emoji: '🏦',
-    title: 'Bank Basics!',
-    question: 'What happens when you put money in a savings account?',
+    question: "What does 'paying yourself first' mean?",
+    emoji: "💵",
     options: [
-      { text: 'It disappears', correct: false },
-      { text: 'It stays safe and can grow', correct: true },
-      { text: 'The bank spends it', correct: false }
+      { id: 'a', text: 'Buying yourself treats before anything else', correct: false },
+      { id: 'b', text: 'Saving money before spending on other things', correct: true },
+      { id: 'c', text: 'Getting paid at your job', correct: false }
     ],
-    reward: 5,
-    tip: 'Banks pay you interest for keeping money with them!'
-  },
-  {
-    id: 6,
-    type: 'scenario',
-    emoji: '⚡',
-    title: 'Emergency!',
-    description: 'Oh no! Your bike got a flat tire. Repairs cost $15.',
-    question: 'What do you learn from this?',
-    options: [
-      { text: 'Always have emergency savings!', correct: true },
-      { text: 'Never ride bikes again', correct: false }
-    ],
-    reward: 0,
-    penalty: 15,
-    tip: 'Emergency funds help when unexpected things happen!'
-  },
-  {
-    id: 7,
-    type: 'bonus',
-    emoji: '⭐',
-    title: 'Bonus Round!',
-    description: 'Grandma gave you $20 for helping her!',
-    question: 'How will you split it?',
-    options: [
-      { text: 'Save $15, Spend $5', correct: true },
-      { text: 'Spend it all now!', correct: false },
-      { text: 'Save all $20', correct: true }
-    ],
-    reward: 20,
-    tip: 'Balancing saving and spending is a great skill!'
+    explanation: 'Put money into savings first, then spend what\'s left!',
+    reward: 5
   }
 ]
 
 export const getRandomChallenge = () => {
-  return challenges[Math.floor(Math.random() * challenges.length)]
+  const randomIndex = Math.floor(Math.random() * challenges.length)
+  return challenges[randomIndex]
 }
+
+export default challenges

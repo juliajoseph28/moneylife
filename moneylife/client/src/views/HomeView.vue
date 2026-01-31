@@ -550,6 +550,13 @@ const launchGame = () => {
   border-width: 3px;
 }
 
+.speech-bubble.small p {
+  color: #2D3436;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
 .bubble-text {
   margin: 4px 0;
   font-size: 17px;
