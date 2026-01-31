@@ -2,68 +2,93 @@
   <div class="game-card">
     <!-- Question View -->
     <div v-if="!showOutcome" class="card question-card">
-      <div class="card-badges">
-        <span class="badge week-badge">📅 Week {{ $parent?.gameState?.week || '1' }}</span>
-        <span class="badge level-badge">⭐ Level {{ $parent?.gameState?.level || '1' }}</span>
-      </div>
-      
-      <div class="scenario-emoji">{{ scenario.emoji }}</div>
-      <h2 class="card-title">{{ scenario.title }}</h2>
-      <p class="card-description">{{ scenario.description }}</p>
-      <p class="card-prompt">"{{ scenario.prompt }}"</p>
-      
-      <div class="choices">
-        <button
-          v-for="choice in scenario.choices"
-          :key="choice.id"
-          @click="selectChoice(choice)"
-          class="choice-btn"
-          :class="getChoiceClass(choice)"
-        >
-          <span class="choice-emoji">{{ choice.emoji }}</span>
-          <span class="choice-text">{{ choice.text }}</span>
-          <span class="choice-cost" :class="{ positive: choice.effects?.balance > 0 }">
-            {{ formatCost(choice) }}
-          </span>
-        </button>
+      <div class="card-layout">
+        <!-- Left: Scenario Info -->
+        <div class="scenario-section">
+          <div class="scenario-header">
+            <span class="week-badge">📅 Week {{ getCurrentWeek() }}</span>
+            <span class="level-badge">⭐ Level {{ getCurrentLevel() }}</span>
+          </div>
+          
+          <div class="scenario-emoji">{{ scenario.emoji }}</div>
+          <h2 class="card-title">{{ scenario.title }}</h2>
+          <p class="card-description">{{ scenario.description }}</p>
+          <p class="card-prompt">"{{ scenario.prompt }}"</p>
+        </div>
+        
+        <!-- Right: Choices -->
+        <div class="choices-section">
+          <h3 class="choices-title">What do you do?</h3>
+          <div class="choices">
+            <button
+              v-for="choice in scenario.choices"
+              :key="choice.id"
+              @click="selectChoice(choice)"
+              class="choice-btn"
+              :class="getChoiceClass(choice)"
+            >
+              <span class="choice-emoji">{{ choice.emoji }}</span>
+              <div class="choice-content">
+                <span class="choice-text">{{ choice.text }}</span>
+                <span class="choice-effects">
+                  <span v-if="choice.effects?.health" class="effect-tag health">
+                    ❤️ {{ choice.effects.health > 0 ? '+' : '' }}{{ choice.effects.health }}
+                  </span>
+                </span>
+              </div>
+              <span class="choice-cost" :class="{ positive: choice.effects?.balance > 0 }">
+                {{ formatCost(choice) }}
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     
     <!-- Outcome View -->
     <div v-else class="card outcome-card" :class="selectedChoice?.outcome?.type">
-      <div class="outcome-icon">{{ outcomeIcon }}</div>
-      <h2 class="outcome-title">{{ selectedChoice.outcome.title }}</h2>
-      <p class="outcome-message">{{ selectedChoice.outcome.message }}</p>
-      
-      <div class="effects-display">
-        <div v-if="selectedChoice.effects.balance" class="effect-item" :class="selectedChoice.effects.balance > 0 ? 'positive' : 'negative'">
-          <span class="effect-icon">💰</span>
-          <span class="effect-value">{{ selectedChoice.effects.balance > 0 ? '+' : '' }}${{ selectedChoice.effects.balance }}</span>
+      <div class="outcome-layout">
+        <!-- Left: Outcome -->
+        <div class="outcome-main">
+          <div class="outcome-icon">{{ outcomeIcon }}</div>
+          <h2 class="outcome-title">{{ selectedChoice.outcome.title }}</h2>
+          <p class="outcome-message">{{ selectedChoice.outcome.message }}</p>
+          
+          <div class="effects-display">
+            <div v-if="selectedChoice.effects.balance" class="effect-item" :class="selectedChoice.effects.balance > 0 ? 'positive' : 'negative'">
+              <span class="effect-icon">💰</span>
+              <span class="effect-value">{{ selectedChoice.effects.balance > 0 ? '+' : '' }}${{ selectedChoice.effects.balance }}</span>
+            </div>
+            <div v-if="selectedChoice.effects.health" class="effect-item" :class="selectedChoice.effects.health > 0 ? 'positive' : 'negative'">
+              <span class="effect-icon">❤️</span>
+              <span class="effect-value">{{ selectedChoice.effects.health > 0 ? '+' : '' }}{{ selectedChoice.effects.health }}</span>
+            </div>
+          </div>
         </div>
-        <div v-if="selectedChoice.effects.health" class="effect-item" :class="selectedChoice.effects.health > 0 ? 'positive' : 'negative'">
-          <span class="effect-icon">❤️</span>
-          <span class="effect-value">{{ selectedChoice.effects.health > 0 ? '+' : '' }}{{ selectedChoice.effects.health }}</span>
+        
+        <!-- Right: Tip & Next -->
+        <div class="outcome-side">
+          <div class="tip-box">
+            <div class="tip-header">
+              <span class="tip-icon">💡</span>
+              <span class="tip-label">Money Tip!</span>
+            </div>
+            <p class="tip-text">{{ selectedChoice.outcome.tip }}</p>
+          </div>
+          
+          <button @click="nextWeek" class="btn-next">
+            <span>Next Week</span>
+            <span class="btn-arrow">→</span>
+          </button>
         </div>
       </div>
-      
-      <div class="tip-box">
-        <div class="tip-header">
-          <span class="tip-icon">💡</span>
-          <span class="tip-label">Money Tip!</span>
-        </div>
-        <p class="tip-text">{{ selectedChoice.outcome.tip }}</p>
-      </div>
-      
-      <button @click="nextWeek" class="btn-next">
-        <span>Next Week</span>
-        <span class="btn-arrow">→</span>
-      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { gameState } from '@/stores/gameState'
 
 const props = defineProps({
   scenario: Object
@@ -73,6 +98,9 @@ const emit = defineEmits(['choice', 'next'])
 
 const selectedChoice = ref(null)
 const showOutcome = ref(false)
+
+const getCurrentWeek = () => gameState.week || 1
+const getCurrentLevel = () => gameState.currentLevel || 1
 
 const outcomeIcon = computed(() => {
   if (!selectedChoice.value) return '📝'
@@ -114,15 +142,15 @@ const nextWeek = () => {
 
 <style scoped>
 .game-card {
-  max-width: 500px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 900px;
 }
 
 .card {
   background: white;
   border-radius: 32px;
-  padding: 28px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  padding: 32px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.1);
   border: 4px solid #FFE66D;
   animation: slideUp 0.4s ease;
 }
@@ -132,15 +160,30 @@ const nextWeek = () => {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Card Badges */
-.card-badges {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 16px;
+/* =====================
+   QUESTION CARD LAYOUT
+   ===================== */
+
+.card-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
 }
 
-.badge {
-  padding: 8px 14px;
+.scenario-section {
+  text-align: center;
+}
+
+.scenario-header {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.week-badge, .level-badge {
+  padding: 8px 16px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 700;
@@ -156,10 +199,8 @@ const nextWeek = () => {
   color: #2D3436;
 }
 
-/* Scenario Content */
 .scenario-emoji {
-  font-size: 72px;
-  text-align: center;
+  font-size: 80px;
   margin-bottom: 16px;
   animation: float 3s ease-in-out infinite;
 }
@@ -170,10 +211,9 @@ const nextWeek = () => {
 }
 
 .card-title {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
   color: #2D3436;
-  text-align: center;
   margin: 0 0 12px;
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
@@ -181,24 +221,35 @@ const nextWeek = () => {
 .card-description {
   font-size: 16px;
   color: #666;
-  text-align: center;
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   line-height: 1.6;
 }
 
 .card-prompt {
   font-size: 18px;
   color: #6C63FF;
-  text-align: center;
   font-weight: 700;
   font-style: italic;
-  margin: 0 0 24px;
-  padding: 12px;
+  margin: 0;
+  padding: 16px;
   background: #F8F0FF;
   border-radius: 16px;
 }
 
-/* Choices */
+/* Choices Section */
+.choices-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.choices-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2D3436;
+  margin: 0 0 16px;
+  font-family: 'Comic Sans MS', 'Chalkboard', cursive;
+}
+
 .choices {
   display: flex;
   flex-direction: column;
@@ -256,20 +307,39 @@ const nextWeek = () => {
   flex-shrink: 0;
 }
 
-.choice-text {
+.choice-content {
   flex: 1;
-  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.choice-text {
+  font-size: 15px;
   font-weight: 600;
   color: #2D3436;
+}
+
+.choice-effects {
+  display: flex;
+  gap: 8px;
+}
+
+.effect-tag {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: #F8F8F8;
 }
 
 .choice-cost {
   font-size: 18px;
   font-weight: 800;
   color: #FF6B9D;
-  padding: 6px 12px;
+  padding: 8px 14px;
   background: #FFF0F5;
   border-radius: 12px;
+  flex-shrink: 0;
 }
 
 .choice-cost.positive {
@@ -277,28 +347,39 @@ const nextWeek = () => {
   background: #F0FFFD;
 }
 
-/* Outcome Card */
+/* =====================
+   OUTCOME CARD LAYOUT
+   ===================== */
+
 .outcome-card {
-  text-align: center;
+  text-align: left;
 }
 
 .outcome-card.positive {
   border-color: #4ECDC4;
-  background: linear-gradient(135deg, #F0FFFD 0%, white 100%);
 }
 
 .outcome-card.negative {
   border-color: #FF6B9D;
-  background: linear-gradient(135deg, #FFF0F5 0%, white 100%);
 }
 
 .outcome-card.tradeoff {
   border-color: #FFE66D;
-  background: linear-gradient(135deg, #FFFDF0 0%, white 100%);
+}
+
+.outcome-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.outcome-main {
+  text-align: center;
 }
 
 .outcome-icon {
-  font-size: 64px;
+  font-size: 72px;
   margin-bottom: 16px;
   animation: pop 0.5s ease;
 }
@@ -320,23 +401,21 @@ const nextWeek = () => {
 .outcome-message {
   font-size: 16px;
   color: #666;
-  margin: 0 0 20px;
+  margin: 0 0 24px;
   line-height: 1.6;
 }
 
-/* Effects Display */
 .effects-display {
   display: flex;
   justify-content: center;
   gap: 16px;
-  margin-bottom: 20px;
 }
 
 .effect-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
+  gap: 8px;
+  padding: 12px 20px;
   border-radius: 16px;
   font-weight: 700;
 }
@@ -359,52 +438,55 @@ const nextWeek = () => {
   font-size: 18px;
 }
 
-/* Tip Box */
+/* Outcome Side */
+.outcome-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .tip-box {
   background: white;
   border: 3px dashed #6C63FF;
   border-radius: 20px;
-  padding: 16px;
-  margin-bottom: 24px;
-  text-align: left;
+  padding: 20px;
 }
 
 .tip-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .tip-icon {
-  font-size: 24px;
+  font-size: 28px;
 }
 
 .tip-label {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   color: #6C63FF;
 }
 
 .tip-text {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   color: #666;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* Next Button */
 .btn-next {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   background: linear-gradient(135deg, #6C63FF 0%, #FF6B9D 100%);
   color: white;
   border: none;
   border-radius: 20px;
-  padding: 18px 32px;
+  padding: 20px 32px;
   font-size: 20px;
   font-weight: 700;
   cursor: pointer;
@@ -426,4 +508,24 @@ const nextWeek = () => {
   0%, 100% { transform: translateX(0); }
   50% { transform: translateX(5px); }
 }
-</style> 
+
+/* =====================
+   RESPONSIVE
+   ===================== */
+
+@media (max-width: 800px) {
+  .card-layout,
+  .outcome-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .scenario-emoji {
+    font-size: 60px;
+  }
+  
+  .card-title {
+    font-size: 24px;
+  }
+}
+</style>

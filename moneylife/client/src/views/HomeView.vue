@@ -1,265 +1,339 @@
 <template>
-  <div class="kids-home" :class="{ 'kids-mode': isKidsMode }">
+  <div class="home-wrapper">
     
-    <!-- STEP 1: Welcome & Age -->
-    <div v-if="currentStep === 'age'" class="step-container">
-      
-      <!-- Fun Header -->
-      <div class="fun-header">
-        <div class="floating-coins">
-          <img src="@/assets/images/kids/gold coin.png" class="coin c1" alt="coin" />
-          <img src="@/assets/images/kids/gold coin.png" class="coin c2" alt="coin" />
-          <img src="@/assets/images/kids/gold coin.png" class="coin c3" alt="coin" />
-        </div>
-        <h1 class="game-logo">
-          <span class="logo-money">Money</span>
-          <span class="logo-life">Life!</span>
-        </h1>
-        <p class="tagline">Learn to save like a superstar!</p>
-        <img src="@/assets/images/kids/gold star.png" class="tagline-star" alt="star" />
-      </div>
-      
-      <!-- Mascot Welcome -->
-      <div class="mascot-container">
-        <div class="mascot-wrapper">
-          <img 
-            src="@/assets/images/kids/happy piggy.png" 
-            class="mascot-image" 
-            alt="Penny the Pig"
-          />
-          <div class="mascot-shadow"></div>
+    <!-- LEFT SIDE: Decorative / Animated -->
+    <div class="left-panel">
+      <div class="decoration-scene">
+        <!-- Floating Elements -->
+        <div class="floating-elements">
+          <img src="@/assets/images/kids/gold coin.png" class="float-coin c1" alt="" />
+          <img src="@/assets/images/kids/gold coin.png" class="float-coin c2" alt="" />
+          <img src="@/assets/images/kids/gold coin.png" class="float-coin c3" alt="" />
+          <img src="@/assets/images/kids/gold star.png" class="float-star s1" alt="" />
+          <img src="@/assets/images/kids/gold star.png" class="float-star s2" alt="" />
+          <span class="float-emoji e1">💰</span>
+          <span class="float-emoji e2">🎯</span>
+          <span class="float-emoji e3">🏆</span>
         </div>
         
-        <div class="speech-bubble-wrapper">
-          <div class="speech-bubble">
+        <!-- Main Mascot -->
+        <div class="mascot-scene">
+          <img src="@/assets/images/kids/happy piggy.png" class="main-mascot" alt="Penny" />
+          <div class="mascot-glow"></div>
+        </div>
+        
+        <!-- What You'll Learn -->
+        <div class="learn-preview">
+          <h3 class="learn-title">What You'll Learn</h3>
+          <div class="learn-cards">
+            <div class="learn-card">
+              <span class="learn-icon">💰</span>
+              <span class="learn-text">Saving</span>
+            </div>
+            <div class="learn-card">
+              <span class="learn-icon">🛒</span>
+              <span class="learn-text">Smart Shopping</span>
+            </div>
+            <div class="learn-card">
+              <span class="learn-icon">🎯</span>
+              <span class="learn-text">Setting Goals</span>
+            </div>
+            <div class="learn-card">
+              <span class="learn-icon">💪</span>
+              <span class="learn-text">Earning Money</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Fun Fact -->
+        <div class="fun-fact">
+          <span class="fact-icon">💡</span>
+          <p class="fact-text">{{ currentFact }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RIGHT SIDE: Main Content -->
+    <div class="right-panel">
+      <div class="content-wrapper">
+        
+        <!-- STEP 1: Welcome & Age -->
+        <div v-if="currentStep === 'age'" class="step-content">
+          
+          <!-- Header -->
+          <div class="content-header">
+            <h1 class="logo-title">
+              <span class="logo-money">Money</span><span class="logo-life">Life!</span>
+            </h1>
+            <p class="tagline">Learn to save like a superstar! ⭐</p>
+          </div>
+          
+          <!-- Speech Bubble -->
+          <div class="welcome-bubble">
+            <div class="bubble-arrow"></div>
             <p class="bubble-text">
               <span class="wave">👋</span> Hiya friend! I'm <strong class="mascot-name">Penny!</strong>
             </p>
-            <p class="bubble-text">Want to play a super fun money game with me?</p>
+            <p class="bubble-text">Ready to play a super fun money game with me?</p>
           </div>
-        </div>
-      </div>
-      
-      <!-- Age Selection -->
-      <div class="age-section">
-        <h2 class="section-question">How old are you?</h2>
-        
-        <div class="age-buttons">
+          
+          <!-- Age Selection -->
+          <div class="age-section">
+            <h2 class="section-title">How old are you?</h2>
+            
+            <div class="age-options">
+              <button 
+                v-for="age in ageGroups" 
+                :key="age.id"
+                class="age-card"
+                :class="{ 
+                  selected: selectedAge === age.id,
+                  'kids-style': age.id === 'kids',
+                  'tween-style': age.id === 'tweens',
+                  'teen-style': age.id === 'teens'
+                }"
+                @click="selectAge(age.id)"
+              >
+                <div class="age-emoji">{{ age.emoji }}</div>
+                <div class="age-range">{{ age.range }}</div>
+                <div class="age-label">{{ age.label }}</div>
+                <img 
+                  v-if="selectedAge === age.id" 
+                  src="@/assets/images/kids/gold star.png" 
+                  class="selected-star" 
+                  alt=""
+                />
+              </button>
+            </div>
+          </div>
+          
+          <!-- Info Cards Row -->
+          <div class="info-row">
+            <div class="info-card safety">
+              <span class="info-icon">🛡️</span>
+              <div class="info-text">
+                <strong>Super Safe!</strong>
+                <span>We don't save any of your info</span>
+              </div>
+            </div>
+            
+            <div v-if="selectedAge === 'kids'" class="info-card parent">
+              <span class="info-icon">👨‍👩‍👧</span>
+              <div class="info-text">
+                <strong>Pro Tip!</strong>
+                <span>Playing with a grown-up is more fun!</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Continue Button -->
           <button 
-            v-for="age in ageGroups" 
-            :key="age.id"
-            class="age-btn"
-            :class="{ 
-              selected: selectedAge === age.id,
-              'kids-style': age.id === 'kids',
-              'tween-style': age.id === 'tweens',
-              'teen-style': age.id === 'teens'
-            }"
-            @click="selectAge(age.id)"
+            v-if="selectedAge"
+            class="btn-continue"
+            @click="nextStep"
           >
-            <div class="age-icon">{{ age.emoji }}</div>
-            <div class="age-numbers">{{ age.range }}</div>
-            <img 
-              v-if="selectedAge === age.id" 
-              src="@/assets/images/kids/gold star.png" 
-              class="age-star" 
-              alt="selected"
-            />
+            <span class="btn-text">Let's Play!</span>
+            <span class="btn-icon">🚀</span>
           </button>
+          
+          <!-- Journey Preview -->
+          <div class="journey-preview">
+            <h3 class="journey-title">Your Adventure Awaits!</h3>
+            <div class="journey-path">
+              <div class="journey-step">
+                <span class="journey-icon">🏡</span>
+                <span class="journey-label">Backyard</span>
+              </div>
+              <div class="journey-arrow">→</div>
+              <div class="journey-step">
+                <span class="journey-icon">🏘️</span>
+                <span class="journey-label">Neighborhood</span>
+              </div>
+              <div class="journey-arrow">→</div>
+              <div class="journey-step">
+                <span class="journey-icon">🏙️</span>
+                <span class="journey-label">Town</span>
+              </div>
+              <div class="journey-arrow">→</div>
+              <div class="journey-step">
+                <span class="journey-icon">🌟</span>
+                <span class="journey-label">Money Master!</span>
+              </div>
+            </div>
+          </div>
+          
         </div>
-      </div>
-      
-      <!-- Safety Badge -->
-      <div class="safety-badge">
-        <div class="badge-icon">🛡️</div>
-        <div class="badge-text">
-          <strong>Super Safe!</strong>
-          <span>We don't save any of your info!</span>
-        </div>
-      </div>
-      
-      <!-- Parent Tip (shows for kids) -->
-      <div v-if="selectedAge === 'kids'" class="parent-tip">
-        <div class="tip-character">👨‍👩‍👧</div>
-        <p>Playing with a grown-up makes it even more fun!</p>
-      </div>
-      
-      <!-- Continue Button -->
-      <button 
-        v-if="selectedAge"
-        class="btn-big-fun"
-        @click="nextStep"
-      >
-        <span class="btn-text">Let's Play!</span>
-        <span class="btn-rocket">🚀</span>
-      </button>
-      
-    </div>
 
-    <!-- STEP 2: Character (Kids Version) -->
-    <div v-if="currentStep === 'character' && selectedAge === 'kids'" class="step-container kids-character">
-      
-      <button class="back-btn-fun" @click="prevStep">
-        <span>←</span> Go Back
-      </button>
-      
-      <!-- Mascot -->
-      <div class="mascot-mini">
-        <img src="@/assets/images/kids/pig.png" class="mascot-small" alt="Penny" />
-        <div class="speech-bubble small">
-          <p>Pick who you want to be!</p>
+        <!-- STEP 2: Character Selection -->
+        <div v-if="currentStep === 'character' && selectedAge === 'kids'" class="step-content">
+          
+          <button class="back-btn" @click="prevStep">
+            <span>←</span> Back
+          </button>
+          
+          <div class="content-header">
+            <h1 class="step-title">Choose Your Character!</h1>
+            <p class="step-subtitle">Who do you want to be?</p>
+          </div>
+          
+          <div class="character-grid">
+            <button
+              v-for="char in kidsCharacters"
+              :key="char.id"
+              class="character-card"
+              :class="{ selected: selectedCharacter === char.id }"
+              @click="selectCharacter(char.id)"
+            >
+              <div class="char-glow" v-if="selectedCharacter === char.id"></div>
+              <div class="char-emoji">{{ char.emoji }}</div>
+              <h3 class="char-name">{{ char.name }}</h3>
+              <p class="char-desc">{{ char.description }}</p>
+              <div class="char-income">
+                <img src="@/assets/images/kids/gold coin.png" class="income-coin" alt="" />
+                <span class="income-amount">{{ char.income }}</span>
+                <span class="income-label">/ week</span>
+              </div>
+              <div v-if="selectedCharacter === char.id" class="selected-badge">
+                ⭐ PICKED!
+              </div>
+            </button>
+          </div>
+          
+          <button 
+            v-if="selectedCharacter"
+            class="btn-continue"
+            @click="nextStep"
+          >
+            <span class="btn-text">Choose My Goal!</span>
+            <span class="btn-icon">🎯</span>
+          </button>
+          
         </div>
-      </div>
-      
-      <h2 class="fun-title">Choose Your Character!</h2>
-      
-      <div class="character-cards-kids">
-        <button
-          v-for="char in kidsCharacters"
-          :key="char.id"
-          class="character-card-kid"
-          :class="{ selected: selectedCharacter === char.id }"
-          @click="selectCharacter(char.id)"
-        >
-          <div class="card-glow"></div>
-          <div class="character-pic">{{ char.emoji }}</div>
-          <h3 class="character-title">{{ char.name }}</h3>
-          <p class="character-desc">{{ char.description }}</p>
-          <div class="character-money">
-            <img src="@/assets/images/kids/gold coin.png" class="money-coin-img" alt="coin" />
-            <span class="money-amount">{{ char.income }}</span>
-            <span class="money-label">every week!</span>
-          </div>
-          <div class="selected-badge" v-if="selectedCharacter === char.id">
-            <img src="@/assets/images/kids/gold star.png" class="badge-star" alt="star" />
-            PICKED!
-          </div>
-        </button>
-      </div>
-      
-      <button 
-        v-if="selectedCharacter"
-        class="btn-big-fun"
-        @click="nextStep"
-      >
-        <span class="btn-text">Next: Pick Your Prize!</span>
-        <span class="btn-icon">🎁</span>
-      </button>
-      
-    </div>
 
-    <!-- STEP 3: Goal Selection (Kids Version) -->
-    <div v-if="currentStep === 'goal' && selectedAge === 'kids'" class="step-container kids-goal">
-      
-      <button class="back-btn-fun" @click="prevStep">
-        <span>←</span> Go Back
-      </button>
-      
-      <!-- Mascot -->
-      <div class="mascot-mini">
-        <img src="@/assets/images/kids/pig.png" class="mascot-small" alt="Penny" />
-        <div class="speech-bubble small">
-          <p>What cool thing do you want?</p>
+        <!-- STEP 3: Goal Selection -->
+        <div v-if="currentStep === 'goal' && selectedAge === 'kids'" class="step-content">
+          
+          <button class="back-btn" @click="prevStep">
+            <span>←</span> Back
+          </button>
+          
+          <div class="content-header">
+            <h1 class="step-title">Pick Your Prize! 🏆</h1>
+            <p class="step-subtitle">What are you saving for?</p>
+          </div>
+          
+          <div class="goal-grid">
+            <button
+              v-for="goal in kidsGoals"
+              :key="goal.name"
+              class="goal-card"
+              :class="{ selected: selectedGoal?.name === goal.name }"
+              @click="selectGoal(goal)"
+            >
+              <div class="goal-glow" :style="{ background: goal.color }" v-if="selectedGoal?.name === goal.name"></div>
+              <img :src="goal.image" class="goal-image" :alt="goal.name" />
+              <h3 class="goal-name">{{ goal.name }}</h3>
+              <div class="goal-price">
+                <img src="@/assets/images/kids/gold coin.png" class="price-coin" alt="" />
+                <span class="price-amount">${{ goal.cost }}</span>
+              </div>
+              <div class="goal-time">⏰ ~{{ calculateWeeks(goal.cost) }} weeks</div>
+              <img 
+                v-if="selectedGoal?.name === goal.name" 
+                src="@/assets/images/kids/gold star.png" 
+                class="goal-star" 
+                alt=""
+              />
+            </button>
+          </div>
+          
+          <button 
+            v-if="selectedGoal"
+            class="btn-continue rainbow"
+            @click="nextStep"
+          >
+            <span class="btn-text">I Want This!</span>
+            <span class="btn-icon">✨</span>
+          </button>
+          
         </div>
-      </div>
-      
-      <h2 class="fun-title">Pick Your Prize! 🏆</h2>
-      
-      <div class="prize-cards">
-        <button
-          v-for="goal in kidsGoals"
-          :key="goal.name"
-          class="prize-card"
-          :class="{ selected: selectedGoal?.name === goal.name }"
-          @click="selectGoal(goal)"
-        >
-          <div class="prize-glow" :style="{ background: goal.color }"></div>
-          <img :src="goal.image" class="prize-image" :alt="goal.name" />
-          <div class="prize-name">{{ goal.name }}</div>
-          <div class="prize-cost">
-            <img src="@/assets/images/kids/gold coin.png" class="cost-coin" alt="coin" />
-            <span class="cost-amount">${{ goal.cost }}</span>
-          </div>
-          <div class="prize-time">
-            <span>⏰</span> ~{{ calculateWeeks(goal.cost) }} weeks
-          </div>
-          <img 
-            v-if="selectedGoal?.name === goal.name" 
-            src="@/assets/images/kids/gold star.png" 
-            class="selected-star-img" 
-            alt="selected"
-          />
-        </button>
-      </div>
-      
-      <button 
-        v-if="selectedGoal"
-        class="btn-big-fun rainbow"
-        @click="nextStep"
-      >
-        <span class="btn-text">I Want This!</span>
-        <span class="btn-sparkles">✨</span>
-      </button>
-      
-    </div>
 
-    <!-- STEP 4: How To Play (Kids Version) -->
-    <div v-if="currentStep === 'tutorial' && selectedAge === 'kids'" class="step-container kids-tutorial">
-      
-      <div class="tutorial-box">
-        <h2 class="tutorial-title">How To Play! 🎮</h2>
-        
-        <div class="tutorial-steps-kids">
-          <div class="tut-step">
-            <div class="step-num">1</div>
-            <div class="step-icon">📅</div>
-            <div class="step-text">Every week, <strong>stuff happens!</strong></div>
+        <!-- STEP 4: Tutorial -->
+        <div v-if="currentStep === 'tutorial' && selectedAge === 'kids'" class="step-content tutorial-step">
+          
+          <div class="tutorial-card">
+            <h1 class="tutorial-title">How To Play! 🎮</h1>
+            
+            <div class="tutorial-steps">
+              <div class="tut-step">
+                <div class="step-number">1</div>
+                <div class="step-icon">📅</div>
+                <div class="step-content">
+                  <strong>Every week, stuff happens!</strong>
+                  <span>You'll face fun money decisions</span>
+                </div>
+              </div>
+              
+              <div class="tut-step">
+                <div class="step-number">2</div>
+                <div class="step-icon">🤔</div>
+                <div class="step-content">
+                  <strong>You decide: spend or save?</strong>
+                  <span>Each choice affects your money & happiness</span>
+                </div>
+              </div>
+              
+              <div class="tut-step">
+                <div class="step-number">3</div>
+                <div class="step-icon">🎯</div>
+                <div class="step-content">
+                  <strong>Save enough to get your prize!</strong>
+                  <span>Reach your goal and WIN!</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="penny-encouragement">
+              <img src="@/assets/images/kids/pig.png" class="penny-small" alt="Penny" />
+              <div class="encouragement-bubble">
+                <p>Don't worry! I'll help you the whole way! 💪</p>
+              </div>
+            </div>
+            
+            <button class="btn-start" @click="launchGame">
+              <span class="btn-text">START THE GAME!</span>
+              <span class="btn-icon">🎮</span>
+              <div class="btn-shine"></div>
+            </button>
           </div>
           
-          <div class="tut-arrow">↓</div>
-          
-          <div class="tut-step">
-            <div class="step-num">2</div>
-            <div class="step-icon">🤔</div>
-            <div class="step-text">You decide: <strong>spend or save?</strong></div>
-          </div>
-          
-          <div class="tut-arrow">↓</div>
-          
-          <div class="tut-step">
-            <div class="step-num">3</div>
-            <div class="step-icon">🎯</div>
-            <div class="step-text">Save enough to <strong>get your prize!</strong></div>
-          </div>
         </div>
         
-        <div class="penny-tip">
-          <img src="@/assets/images/kids/pig.png" class="tip-piggy" alt="Penny" />
-          <div class="tip-bubble">
-            <p>Don't worry! I'll help you the whole way! 💪</p>
-          </div>
-        </div>
-        
-        <button class="btn-start-game" @click="launchGame">
-          <div class="btn-inner">
-            <span class="start-text">START THE GAME!</span>
-            <span class="start-icon">🎮</span>
-          </div>
-          <div class="btn-shine"></div>
-        </button>
       </div>
-      
+    </div>
+    
+    <!-- Badges Preview (Bottom Bar) -->
+    <div class="badges-bar">
+      <span class="badges-label">🏅 Badges you can earn:</span>
+      <div class="badges-preview">
+        <span class="badge-item" title="First Saver">🌟</span>
+        <span class="badge-item" title="Quiz Master">🧠</span>
+        <span class="badge-item" title="Goal Getter">🏆</span>
+        <span class="badge-item" title="Shop Smart">🛒</span>
+        <span class="badge-item" title="Skill Builder">💪</span>
+        <span class="badge-item" title="Level Up">🚀</span>
+      </div>
     </div>
     
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGameStore } from '@/stores/gameState'
 
-// Import images for goals
+// Import images
 import toyImage from '@/assets/images/kids/doll toy cartoon.png'
 import artImage from '@/assets/images/kids/crayon box.png'
 import gameImage from '@/assets/images/kids/game controler.png'
@@ -272,12 +346,29 @@ const selectedAge = ref(null)
 const selectedCharacter = ref(null)
 const selectedGoal = ref(null)
 
-const isKidsMode = computed(() => selectedAge.value === 'kids')
+// Fun facts that rotate
+const funFacts = [
+  "The first coins were made over 2,600 years ago! 🪙",
+  "Kids who save early often become great with money! 💰",
+  "A piggy bank is called that because of old clay jars! 🐷",
+  "Saving just $1 a day = $365 a year! 📅",
+  "The word 'bank' comes from the Italian word 'banca'! 🏦"
+]
+
+const currentFactIndex = ref(0)
+const currentFact = computed(() => funFacts[currentFactIndex.value])
+
+// Rotate facts
+onMounted(() => {
+  setInterval(() => {
+    currentFactIndex.value = (currentFactIndex.value + 1) % funFacts.length
+  }, 5000)
+})
 
 const ageGroups = [
-  { id: 'kids', range: '8-10', emoji: '🧒' },
-  { id: 'tweens', range: '11-13', emoji: '🧑' },
-  { id: 'teens', range: '14-16', emoji: '🧑‍🎓' }
+  { id: 'kids', range: '8-10', emoji: '🧒', label: 'Kids' },
+  { id: 'tweens', range: '11-13', emoji: '🧑', label: 'Tweens' },
+  { id: 'teens', range: '14-16', emoji: '🧑‍🎓', label: 'Teens' }
 ]
 
 const kidsCharacters = [
@@ -350,66 +441,244 @@ const launchGame = () => {
 
 <style scoped>
 /* =====================
-   CREAM BACKGROUND BASE
+   BASE LAYOUT
    ===================== */
 
-.kids-home {
+.home-wrapper {
   min-height: 100vh;
-  background: #FFF8F0;
-  padding: 20px;
-  overflow-x: hidden;
-}
-
-.kids-home.kids-mode {
-  background: linear-gradient(180deg, #FFF8F0 0%, #FFE8D6 50%, #FFDAB9 100%);
-}
-
-.step-container {
-  max-width: 500px;
-  margin: 0 auto;
-  animation: slideUp 0.4s ease;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  display: grid;
+  grid-template-columns: 45% 55%;
+  grid-template-rows: 1fr auto;
+  background: linear-gradient(135deg, #FFF8F0 0%, #FFE8D6 100%);
 }
 
 /* =====================
-   FUN HEADER
+   LEFT PANEL
    ===================== */
 
-.fun-header {
-  text-align: center;
-  margin-bottom: 24px;
+.left-panel {
+  background: linear-gradient(135deg, #FFE8D6 0%, #FFDAB9 100%);
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
+  overflow: hidden;
+  grid-row: 1 / 2;
 }
 
-.floating-coins {
+.decoration-scene {
   position: relative;
-  height: 50px;
-  margin-bottom: 8px;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
 }
 
-.coin {
+/* Floating Elements */
+.floating-elements {
   position: absolute;
-  width: 40px;
-  height: 40px;
-  animation: float 3s ease-in-out infinite;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px; /* Limit the height so they only float at the top */
+  pointer-events: none;
+  z-index: 1; /* Behind the content */
+  overflow: hidden;
 }
 
-.c1 { left: 25%; animation-delay: 0s; }
-.c2 { left: 50%; transform: translateX(-50%); animation-delay: 0.5s; }
-.c3 { right: 25%; animation-delay: 1s; }
+.float-coin {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  animation: floatAround 6s ease-in-out infinite;
+  opacity: 0.7;
+}
 
-@keyframes float {
+.c1 { top: 5%; left: 5%; animation-delay: 0s; }
+.c2 { top: 10%; right: 10%; animation-delay: 2s; }
+.c3 { top: 20%; left: 15%; animation-delay: 4s; }
+
+.float-star {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  animation: twinkle 3s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+.s1 { top: 8%; right: 20%; animation-delay: 1s; }
+.s2 { top: 15%; right: 5%; animation-delay: 2.5s; }
+
+.float-emoji {
+  position: absolute;
+  font-size: 28px;
+  animation: floatAround 8s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+.e1 { top: 3%; right: 25%; animation-delay: 1s; }
+.e2 { top: 12%; left: 3%; animation-delay: 3s; }
+.e3 { top: 18%; right: 8%; animation-delay: 5s; }
+
+@keyframes floatAround {
   0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-15px) rotate(10deg); }
+  25% { transform: translateY(-20px) rotate(10deg); }
+  50% { transform: translateY(-10px) rotate(-5deg); }
+  75% { transform: translateY(-25px) rotate(5deg); }
 }
 
-.game-logo {
-  font-size: 48px;
-  font-weight: 900;
+@keyframes twinkle {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  50% { opacity: 0.6; transform: scale(0.8) rotate(180deg); }
+}
+
+/* Mascot Scene */
+.mascot-scene {
+  position: relative;
+  z-index: 10;
+}
+
+.main-mascot {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  animation: mascotBounce 3s ease-in-out infinite;
+  filter: drop-shadow(0 20px 40px rgba(255, 107, 157, 0.3));
+}
+
+@keyframes mascotBounce {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-20px) rotate(2deg); }
+}
+
+.mascot-glow {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 40px;
+  background: radial-gradient(ellipse, rgba(255, 107, 157, 0.3) 0%, transparent 70%);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+}
+
+/* What You'll Learn */
+.learn-preview {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 10; /* Above the floating elements */
+}
+
+.learn-title {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #2D3436;
+  text-align: center;
+  font-family: 'Comic Sans MS', 'Chalkboard', cursive;
+}
+
+.learn-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.learn-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #FFF8F0;
+  border-radius: 12px;
+  border: 2px solid #FFE66D;
+}
+
+.learn-icon {
+  font-size: 24px;
+}
+
+.learn-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2D3436;
+}
+
+/* Fun Fact */
+.fun-fact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: 16px;
+  padding: 16px 20px;
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border-left: 4px solid #6C63FF;
+  position: relative;
+  z-index: 10; /* Above the floating elements */
+}
+
+.fact-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.fact-text {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* =====================
+   RIGHT PANEL
+   ===================== */
+
+.right-panel {
+  padding: 40px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-row: 1 / 2;
+  overflow-y: auto;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 600px;
+}
+
+.step-content {
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Header */
+.content-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo-title {
+  font-size: 56px;
   margin: 0;
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
@@ -426,135 +695,44 @@ const launchGame = () => {
 
 .tagline {
   font-size: 18px;
-  color: #666;
-  margin-top: 8px;
-  font-weight: 600;
+  color: #888;
+  margin: 8px 0 0;
 }
 
-.tagline-star {
-  width: 24px;
-  height: 24px;
-  vertical-align: middle;
-  margin-left: 4px;
-  animation: spin 3s linear infinite;
+.step-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: #2D3436;
+  margin: 0;
+  font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.step-subtitle {
+  font-size: 16px;
+  color: #888;
+  margin: 8px 0 0;
 }
 
-/* =====================
-   MASCOT
-   ===================== */
-
-.mascot-container {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.mascot-wrapper {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.mascot-image {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  animation: mascotBounce 2s ease-in-out infinite;
-  filter: drop-shadow(0 8px 16px rgba(255, 107, 157, 0.3));
-}
-
-.mascot-small {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-  animation: mascotBounce 2s ease-in-out infinite;
-}
-
-.tip-piggy {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-}
-
-@keyframes mascotBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.mascot-shadow {
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 16px;
-  background: rgba(0,0,0,0.1);
-  border-radius: 50%;
-  animation: shadowPulse 2s ease-in-out infinite;
-}
-
-@keyframes shadowPulse {
-  0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.2; }
-  50% { transform: translateX(-50%) scale(0.8); opacity: 0.1; }
-}
-
-/* =====================
-   SPEECH BUBBLE
-   ===================== */
-
-.speech-bubble-wrapper {
-  flex: 1;
-}
-
-.speech-bubble {
+/* Welcome Bubble */
+.welcome-bubble {
   background: white;
   border-radius: 24px;
-  padding: 16px 20px;
+  padding: 20px 24px;
+  margin-bottom: 32px;
   position: relative;
   box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  border: 4px solid #FFE66D;
+  border: 3px solid #FFE66D;
 }
 
-.speech-bubble::before {
-  content: '';
+.bubble-arrow {
   position: absolute;
   left: -16px;
-  top: 24px;
+  top: 30px;
   width: 0;
   height: 0;
   border-top: 12px solid transparent;
   border-bottom: 12px solid transparent;
   border-right: 16px solid #FFE66D;
-}
-
-.speech-bubble::after {
-  content: '';
-  position: absolute;
-  left: -10px;
-  top: 26px;
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-right: 14px solid white;
-}
-
-.speech-bubble.small {
-  padding: 12px 16px;
-  border-radius: 16px;
-  border-width: 3px;
-}
-
-.speech-bubble.small p {
-  color: #2D3436;
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0;
 }
 
 .bubble-text {
@@ -580,159 +758,143 @@ const launchGame = () => {
   font-size: 22px;
 }
 
-/* =====================
-   AGE SELECTION
-   ===================== */
-
+/* Age Section */
 .age-section {
-  text-align: center;
   margin-bottom: 24px;
 }
 
-.section-question {
+.section-title {
   font-size: 28px;
+  font-weight: 800;
   color: #2D3436;
-  margin-bottom: 20px;
+  text-align: center;
+  margin: 0 0 20px;
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
 
-.age-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
+.age-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
-.age-btn {
+.age-card {
   background: white;
   border: 4px solid #E0E0E0;
   border-radius: 24px;
-  padding: 20px 24px;
+  padding: 24px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  min-width: 100px;
   position: relative;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
 }
 
-.age-btn:hover {
-  transform: translateY(-8px) scale(1.05);
+.age-card:hover {
+  transform: translateY(-8px);
   box-shadow: 0 12px 32px rgba(0,0,0,0.12);
 }
 
-.age-btn.selected {
-  transform: translateY(-8px) scale(1.05);
-}
-
-.age-btn.kids-style.selected {
+.age-card.selected.kids-style {
   border-color: #FF6B9D;
   background: #FFF0F5;
 }
 
-.age-btn.tween-style.selected {
+.age-card.selected.tween-style {
   border-color: #4ECDC4;
   background: #F0FFFD;
 }
 
-.age-btn.teen-style.selected {
+.age-card.selected.teen-style {
   border-color: #6C63FF;
   background: #F0F0FF;
 }
 
-.age-icon {
-  font-size: 44px;
+.age-emoji {
+  font-size: 48px;
 }
 
-.age-numbers {
-  font-size: 24px;
-  font-weight: 800;
+.age-range {
+  font-size: 28px;
+  font-weight: 900;
   color: #2D3436;
 }
 
-.age-star {
+.age-label {
+  font-size: 14px;
+  color: #888;
+  font-weight: 600;
+}
+
+.selected-star {
   position: absolute;
   top: -12px;
   right: -12px;
-  width: 32px;
-  height: 32px;
-  animation: spin 2s linear infinite;
+  width: 36px;
+  height: 36px;
+  animation: spin 3s linear infinite;
 }
 
-/* =====================
-   SAFETY BADGE
-   ===================== */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
-.safety-badge {
+/* Info Row */
+.info-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-card {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 12px;
   background: white;
-  border-radius: 20px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
+  border-radius: 16px;
+  padding: 16px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.info-card.safety {
   border: 3px solid #4ECDC4;
 }
 
-.badge-icon {
-  font-size: 36px;
+.info-card.parent {
+  border: 3px solid #FFE66D;
 }
 
-.badge-text {
+.info-icon {
+  font-size: 32px;
+}
+
+.info-text {
   display: flex;
   flex-direction: column;
 }
 
-.badge-text strong {
-  color: #4ECDC4;
-  font-size: 18px;
-}
-
-.badge-text span {
-  color: #666;
+.info-text strong {
   font-size: 14px;
-}
-
-/* =====================
-   PARENT TIP
-   ===================== */
-
-.parent-tip {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: white;
-  border-radius: 20px;
-  padding: 16px 20px;
-  margin-bottom: 20px;
-  border-left: 6px solid #FFE66D;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-}
-
-.tip-character {
-  font-size: 36px;
-}
-
-.parent-tip p {
   color: #2D3436;
-  font-size: 16px;
-  margin: 0;
-  font-weight: 500;
 }
 
-/* =====================
-   BIG FUN BUTTON
-   ===================== */
+.info-text span {
+  font-size: 12px;
+  color: #888;
+}
 
-.btn-big-fun {
+/* Continue Button */
+.btn-continue {
   width: 100%;
   background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
   border: none;
-  border-radius: 24px;
-  padding: 22px 32px;
+  border-radius: 20px;
+  padding: 20px 32px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -740,103 +902,109 @@ const launchGame = () => {
   justify-content: center;
   gap: 12px;
   box-shadow: 0 8px 24px rgba(78, 205, 196, 0.4);
-  position: relative;
-  overflow: hidden;
+  margin-bottom: 32px;
 }
 
-.btn-big-fun:hover {
+.btn-continue:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(78, 205, 196, 0.5);
 }
 
-.btn-big-fun.rainbow {
+.btn-continue.rainbow {
   background: linear-gradient(135deg, #FF6B9D 0%, #FFE66D 50%, #4ECDC4 100%);
-  box-shadow: 0 8px 24px rgba(255, 107, 157, 0.4);
 }
 
 .btn-text {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   color: white;
-  text-shadow: 2px 2px 0px rgba(0,0,0,0.15);
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
 
-.btn-rocket, .btn-icon, .btn-sparkles {
-  font-size: 32px;
-  animation: bounce 1s ease-in-out infinite;
+.btn-icon {
+  font-size: 28px;
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+/* Journey Preview */
+.journey-preview {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
 }
 
-/* =====================
-   BACK BUTTON
-   ===================== */
+.journey-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #2D3436;
+  text-align: center;
+}
 
-.back-btn-fun {
+.journey-path {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.journey-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.journey-icon {
+  font-size: 28px;
+}
+
+.journey-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #666;
+}
+
+.journey-arrow {
+  font-size: 20px;
+  color: #CCC;
+}
+
+/* Back Button */
+.back-btn {
   background: white;
   border: 3px solid #E0E0E0;
   border-radius: 30px;
-  padding: 12px 24px;
+  padding: 10px 20px;
   color: #666;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.back-btn-fun:hover {
+.back-btn:hover {
   background: #F8F8F8;
   border-color: #CCC;
 }
 
-/* =====================
-   MASCOT MINI
-   ===================== */
-
-.mascot-mini {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-/* =====================
-   FUN TITLE
-   ===================== */
-
-.fun-title {
-  font-size: 32px;
-  color: #2D3436;
-  text-align: center;
-  margin-bottom: 24px;
-  font-family: 'Comic Sans MS', 'Chalkboard', cursive;
-}
-
-/* =====================
-   CHARACTER CARDS (KIDS)
-   ===================== */
-
-.character-cards-kids {
+/* Character Grid */
+.character-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 20px;
   margin-bottom: 24px;
 }
 
-.character-card-kid {
+.character-card {
   background: white;
   border: 4px solid #E0E0E0;
   border-radius: 28px;
-  padding: 24px 16px;
+  padding: 28px 20px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -844,82 +1012,59 @@ const launchGame = () => {
   align-items: center;
   text-align: center;
   position: relative;
-  overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
-.character-card-kid:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+.character-card:hover {
+  transform: translateY(-8px);
 }
 
-.character-card-kid.selected {
+.character-card.selected {
   border-color: #FFE66D;
   background: #FFFDF0;
 }
 
-.card-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: linear-gradient(180deg, #FFE66D 0%, transparent 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.character-card-kid.selected .card-glow {
-  opacity: 0.3;
-}
-
-.character-pic {
-  font-size: 64px;
+.char-emoji {
+  font-size: 72px;
   margin-bottom: 12px;
-  animation: characterFloat 3s ease-in-out infinite;
 }
 
-@keyframes characterFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-.character-title {
+.char-name {
+  margin: 0 0 8px;
   font-size: 22px;
   font-weight: 800;
   color: #2D3436;
-  margin: 0 0 8px;
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
 
-.character-desc {
+.char-desc {
+  margin: 0 0 16px;
   font-size: 14px;
   color: #666;
-  margin: 0 0 16px;
   line-height: 1.4;
 }
 
-.character-money {
-  background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%);
-  border-radius: 16px;
-  padding: 10px 16px;
+.char-income {
   display: flex;
   align-items: center;
   gap: 8px;
+  background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%);
+  padding: 10px 18px;
+  border-radius: 16px;
 }
 
-.money-coin-img {
+.income-coin {
   width: 24px;
   height: 24px;
 }
 
-.money-amount {
+.income-amount {
   font-size: 22px;
   font-weight: 800;
   color: #2D3436;
 }
 
-.money-label {
+.income-label {
   font-size: 12px;
   color: #666;
 }
@@ -934,38 +1079,21 @@ const launchGame = () => {
   font-weight: 700;
   padding: 6px 12px;
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  animation: pulse 1s ease-in-out infinite;
 }
 
-.badge-star {
-  width: 16px;
-  height: 16px;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-/* =====================
-   PRIZE CARDS
-   ===================== */
-
-.prize-cards {
+/* Goal Grid */
+.goal-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
-.prize-card {
+.goal-card {
   background: white;
   border: 4px solid #E0E0E0;
   border-radius: 24px;
-  padding: 20px 12px;
+  padding: 20px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -973,82 +1101,57 @@ const launchGame = () => {
   align-items: center;
   text-align: center;
   position: relative;
-  overflow: hidden;
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
-.prize-card:hover {
+.goal-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
 }
 
-.prize-card.selected {
+.goal-card.selected {
   border-color: #FFE66D;
   background: #FFFDF0;
 }
 
-.prize-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  opacity: 0.15;
-  transition: opacity 0.3s ease;
-}
-
-.prize-card.selected .prize-glow {
-  opacity: 0.3;
-}
-
-.prize-image {
-  width: 70px;
-  height: 70px;
+.goal-image {
+  width: 80px;
+  height: 80px;
   object-fit: contain;
   margin-bottom: 12px;
-  animation: prizeShine 2s ease-in-out infinite;
 }
 
-@keyframes prizeShine {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-
-.prize-name {
+.goal-name {
+  margin: 0 0 8px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
   color: #2D3436;
-  margin-bottom: 8px;
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
 
-.prize-cost {
+.goal-price {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;
 }
 
-.cost-coin {
+.price-coin {
   width: 20px;
   height: 20px;
 }
 
-.cost-amount {
+.price-amount {
   font-size: 24px;
   font-weight: 800;
   color: #4ECDC4;
 }
 
-.prize-time {
-  font-size: 11px;
+.goal-time {
+  font-size: 12px;
   color: #999;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
-.selected-star-img {
+.goal-star {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -1057,54 +1160,52 @@ const launchGame = () => {
   animation: spin 2s linear infinite;
 }
 
-/* =====================
-   TUTORIAL
-   ===================== */
-
-.kids-tutorial {
+/* Tutorial */
+.tutorial-step {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 80vh;
 }
 
-.tutorial-box {
+.tutorial-card {
   background: white;
   border-radius: 32px;
-  padding: 36px 28px;
-  text-align: center;
+  padding: 40px;
   box-shadow: 0 16px 48px rgba(0,0,0,0.12);
-  max-width: 420px;
   border: 4px solid #FFE66D;
+  text-align: center;
+  max-width: 500px;
 }
 
 .tutorial-title {
   font-size: 36px;
   color: #6C63FF;
-  margin-bottom: 28px;
+  margin: 0 0 32px;
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
 
-.tutorial-steps-kids {
+.tutorial-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
 .tut-step {
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: #F8F9FA;
-  border-radius: 20px;
-  padding: 18px;
-  margin-bottom: 8px;
+  gap: 16px;
+  background: #FFF8F0;
+  border-radius: 16px;
+  padding: 16px 20px;
+  text-align: left;
 }
 
-.step-num {
-  width: 40px;
-  height: 40px;
+.step-number {
+  width: 36px;
+  height: 36px;
   background: linear-gradient(135deg, #6C63FF 0%, #FF6B9D 100%);
   color: white;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   border-radius: 50%;
   display: flex;
@@ -1114,86 +1215,72 @@ const launchGame = () => {
 }
 
 .step-icon {
-  font-size: 32px;
+  font-size: 28px;
+  flex-shrink: 0;
 }
 
-.step-text {
-  flex: 1;
-  text-align: left;
-  font-size: 17px;
+.step-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-content strong {
+  font-size: 15px;
   color: #2D3436;
 }
 
-.tut-arrow {
-  font-size: 28px;
-  color: #6C63FF;
-  margin: 8px 0;
+.step-content span {
+  font-size: 13px;
+  color: #888;
 }
 
-.penny-tip {
+.penny-encouragement {
   display: flex;
   align-items: center;
   gap: 12px;
   background: #FFF0F5;
-  border-radius: 20px;
-  padding: 14px 18px;
+  border-radius: 16px;
+  padding: 16px;
   margin-bottom: 24px;
 }
 
-.tip-bubble {
-  flex: 1;
+.penny-small {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
 }
 
-.tip-bubble p {
+.encouragement-bubble p {
   margin: 0;
+  font-size: 15px;
   color: #FF6B9D;
   font-weight: 600;
-  font-size: 16px;
 }
 
-/* =====================
-   START GAME BUTTON
-   ===================== */
-
-.btn-start-game {
+.btn-start {
   width: 100%;
   background: linear-gradient(135deg, #6C63FF 0%, #FF6B9D 100%);
   border: none;
-  border-radius: 24px;
-  padding: 0;
+  border-radius: 20px;
+  padding: 22px 32px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(108, 99, 255, 0.4);
-  transition: all 0.3s ease;
-}
-
-.btn-start-game:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(108, 99, 255, 0.5);
-}
-
-.btn-inner {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 22px 32px;
-  position: relative;
-  z-index: 1;
+  box-shadow: 0 8px 32px rgba(108, 99, 255, 0.4);
+  transition: all 0.3s ease;
 }
 
-.start-text {
-  font-size: 26px;
-  font-weight: 800;
-  color: white;
-  text-shadow: 2px 2px 0px rgba(0,0,0,0.15);
-  font-family: 'Comic Sans MS', 'Chalkboard', cursive;
+.btn-start:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(108, 99, 255, 0.5);
 }
 
-.start-icon {
-  font-size: 36px;
-  animation: bounce 1s ease-in-out infinite;
+.btn-start .btn-text {
+  font-size: 24px;
 }
 
 .btn-shine {
@@ -1209,5 +1296,110 @@ const launchGame = () => {
 @keyframes shine {
   0% { left: -100%; }
   50%, 100% { left: 100%; }
+}
+
+/* =====================
+   BADGES BAR
+   ===================== */
+
+.badges-bar {
+  grid-column: 1 / -1;
+  background: white;
+  border-top: 4px solid #FFE66D;
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.badges-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #888;
+}
+
+.badges-preview {
+  display: flex;
+  gap: 12px;
+}
+
+.badge-item {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: linear-gradient(135deg, #F8F8F8 0%, #E8E8E8 100%);
+  border-radius: 12px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.badge-item:hover {
+  opacity: 1;
+  transform: scale(1.15);
+  background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%);
+}
+
+/* =====================
+   RESPONSIVE
+   ===================== */
+
+@media (max-width: 1024px) {
+  .home-wrapper {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+  
+  .left-panel {
+    display: none;
+  }
+  
+  .right-panel {
+    padding: 24px;
+  }
+  
+  .logo-title {
+    font-size: 42px;
+  }
+  
+  .age-options {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  
+  .character-grid {
+    gap: 16px;
+  }
+  
+  .goal-grid {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .age-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .character-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .goal-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-row {
+    flex-direction: column;
+  }
+  
+  .badges-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
 }
 </style>

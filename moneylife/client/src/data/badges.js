@@ -4,62 +4,131 @@ export const badges = [
     name: 'First Saver',
     emoji: '🌟',
     description: 'Made your first saving choice!',
-    unlocked: false
+    unlocked: false,
+    skill: 'Patience +5',
+    skillKey: 'patience',
+    skillAmount: 5,
+    skillLesson: 'Saving money means choosing to keep it instead of spending it right away. Even small amounts add up over time!'
   },
   {
     id: 'quiz_master',
     name: 'Quiz Master',
     emoji: '🧠',
     description: 'Got 3 quiz questions right!',
-    unlocked: false
+    unlocked: false,
+    skill: 'Planning +5',
+    skillKey: 'planning',
+    skillAmount: 5,
+    skillLesson: 'Knowledge is power! Understanding money helps you make smarter decisions about saving and spending.'
   },
   {
     id: 'goal_reached',
     name: 'Goal Getter',
     emoji: '🏆',
     description: 'Reached your savings goal!',
-    unlocked: false
+    unlocked: false,
+    skill: 'All Skills +10',
+    skillKey: 'all',
+    skillAmount: 10,
+    skillLesson: 'You set a goal and achieved it! This takes patience, planning, and responsibility. You proved you can do it!'
   },
   {
     id: 'week_5',
     name: 'Dedicated',
     emoji: '📅',
     description: 'Played for 5 weeks!',
-    unlocked: false
+    unlocked: false,
+    skill: 'Responsibility +5',
+    skillKey: 'responsibility',
+    skillAmount: 5,
+    skillLesson: 'Consistency matters! Checking on your money regularly helps you stay on track with your goals.'
   },
   {
     id: 'balanced',
     name: 'Balanced Life',
     emoji: '⚖️',
-    description: 'Kept health high while saving!',
-    unlocked: false
+    description: 'Kept happiness high while saving!',
+    unlocked: false,
+    skill: 'Planning +5',
+    skillKey: 'planning',
+    skillAmount: 5,
+    skillLesson: 'Life is about balance! You can save money AND still enjoy yourself. Planning helps you do both.'
   },
   {
     id: 'big_saver',
     name: 'Big Saver',
     emoji: '💰',
     description: 'Saved $50 or more!',
-    unlocked: false
+    unlocked: false,
+    skill: 'Patience +10',
+    skillKey: 'patience',
+    skillAmount: 10,
+    skillLesson: 'Wow! $50 is a lot of money to save. You showed amazing patience and self-control!'
   },
   {
     id: 'shop_smart',
     name: 'Shop Smart',
     emoji: '🛒',
     description: 'Aced 2 shopping quizzes!',
-    unlocked: false
+    unlocked: false,
+    skill: 'Planning +5',
+    skillKey: 'planning',
+    skillAmount: 5,
+    skillLesson: 'Smart shoppers compare prices and think before buying. You saved money by being thoughtful!'
   },
   {
     id: 'skill_master',
     name: 'Skill Builder',
     emoji: '💪',
     description: 'Got a skill to 50 points!',
-    unlocked: false
+    unlocked: false,
+    skill: 'All Skills +5',
+    skillKey: 'all',
+    skillAmount: 5,
+    skillLesson: 'You\'ve become really good at one money skill! Keep building all your skills to become a Money Master!'
   },
   {
     id: 'level_up',
     name: 'Level Up!',
     emoji: '🚀',
     description: 'Reached Level 2!',
-    unlocked: false
+    unlocked: false,
+    skill: 'All Skills +5',
+    skillKey: 'all',
+    skillAmount: 5,
+    skillLesson: 'You advanced to a new level! This means you\'re ready for bigger challenges and rewards.'
+  },
+  {
+    id: 'generous',
+    name: 'Generous Heart',
+    emoji: '💝',
+    description: 'Helped a friend in need!',
+    unlocked: false,
+    skill: 'Generosity +10',
+    skillKey: 'generosity',
+    skillAmount: 10,
+    skillLesson: 'Sharing with others is one of the best uses of money. Generosity makes you AND others happy!'
+  },
+  {
+    id: 'wise_spender',
+    name: 'Wise Spender',
+    emoji: '🦉',
+    description: 'Made 5 thoughtful spending choices!',
+    unlocked: false,
+    skill: 'Planning +5',
+    skillKey: 'planning',
+    skillAmount: 5,
+    skillLesson: 'Spending isn\'t bad - spending WISELY is the key! You think carefully before using your money.'
+  },
+  {
+    id: 'money_master',
+    name: 'Money Master',
+    emoji: '👑',
+    description: 'Reached Level 4 - the highest level!',
+    unlocked: false,
+    skill: 'All Skills +20',
+    skillKey: 'all',
+    skillAmount: 20,
+    skillLesson: 'You\'ve mastered all the money skills! You understand saving, spending, earning, and planning. Amazing job!'
   }
 ]

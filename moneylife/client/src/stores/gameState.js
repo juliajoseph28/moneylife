@@ -94,7 +94,10 @@ export const gameState = reactive({
   totalSpent: 0,
   savingChoices: 0,
   spendingChoices: 0,
-  
+// Add to the gameState reactive object:
+  generousChoices: 0,
+  thoughtfulSpending: 0,
+
   // Skills (0-100 each)
   skills: {
     patience: 20,
@@ -254,28 +257,66 @@ export const gameState = reactive({
   },
   
   checkBadges() {
-    const newlyUnlocked = []
-    this.badges.forEach(badge => {
-      if (badge.unlocked) return
-      let shouldUnlock = false
-      switch (badge.id) {
-        case 'first_save': shouldUnlock = this.savingChoices >= 1; break
-        case 'quiz_master': shouldUnlock = this.correctAnswers >= 3; break
-        case 'goal_reached': shouldUnlock = this.balance >= this.goal; break
-        case 'week_5': shouldUnlock = this.week >= 5; break
-        case 'balanced': shouldUnlock = this.health >= 40 && this.savingChoices >= 3; break
-        case 'big_saver': shouldUnlock = this.balance >= 50; break
-        case 'shop_smart': shouldUnlock = this.shopQuizzesCorrect >= 2; break
-        case 'skill_master': shouldUnlock = Object.values(this.skills).some(s => s >= 50); break
-        case 'level_up': shouldUnlock = this.currentLevel >= 2; break
+  const newlyUnlocked = []
+  this.badges.forEach(badge => {
+    if (badge.unlocked) return
+    let shouldUnlock = false
+    
+    switch (badge.id) {
+      case 'first_save': 
+        shouldUnlock = this.savingChoices >= 1
+        break
+      case 'quiz_master': 
+        shouldUnlock = this.correctAnswers >= 3
+        break
+      case 'goal_reached': 
+        shouldUnlock = this.balance >= this.goal
+        break
+      case 'week_5': 
+        shouldUnlock = this.week >= 5
+        break
+      case 'balanced': 
+        shouldUnlock = this.health >= 40 && this.savingChoices >= 3
+        break
+      case 'big_saver': 
+        shouldUnlock = this.balance >= 50
+        break
+      case 'shop_smart': 
+        shouldUnlock = this.shopQuizzesCorrect >= 2
+        break
+      case 'skill_master': 
+        shouldUnlock = Object.values(this.skills).some(s => s >= 50)
+        break
+      case 'level_up': 
+        shouldUnlock = this.currentLevel >= 2
+        break
+      case 'generous':
+        shouldUnlock = this.generousChoices >= 1
+        break
+      case 'wise_spender':
+        shouldUnlock = this.thoughtfulSpending >= 5
+        break
+      case 'money_master':
+        shouldUnlock = this.currentLevel >= 4
+        break
+    }
+    
+    if (shouldUnlock) {
+      badge.unlocked = true
+      newlyUnlocked.push(badge)
+      
+      // Award skill points for unlocking badge
+      if (badge.skillKey === 'all') {
+        Object.keys(this.skills).forEach(skill => {
+          this.addSkill(skill, badge.skillAmount)
+        })
+      } else if (badge.skillKey) {
+        this.addSkill(badge.skillKey, badge.skillAmount)
       }
-      if (shouldUnlock) {
-        badge.unlocked = true
-        newlyUnlocked.push(badge)
-      }
-    })
-    return newlyUnlocked
-  },
+    }
+  })
+  return newlyUnlocked
+},
   
   reset() {
     this.balance = 50
@@ -287,6 +328,8 @@ export const gameState = reactive({
     this.totalSpent = 0
     this.savingChoices = 0
     this.spendingChoices = 0
+    this.generousChoices = 0
+    this.thoughtfulSpending = 0
     this.skills = {
       patience: 20,
       planning: 20,
