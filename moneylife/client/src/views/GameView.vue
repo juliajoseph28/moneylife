@@ -384,27 +384,33 @@ const handleChoice = (choice) => {
 }
 
 const handleNext = () => {
-  gameState.balance += gameState.weeklyIncome
-  gameState.addSkill('responsibility', 1)
-  gameState.week++
+  // 1. First, check if they hit the goal and need to Level Up
+  const leveledUp = gameState.checkLevelUp();
   
-  const leveledUp = gameState.checkLevelUp()
-  if (leveledUp) return
+  if (leveledUp) {
+    // Stop here! The LevelUpPopup is now showing.
+    // When they click "Awesome", they will start Level 2 at Week 1.
+    return;
+  }
+
+  // 2. If they didn't level up, just proceed to the next week normally
+  gameState.balance += gameState.weeklyIncome;
+  gameState.week++;
   
-  if (gameState.maybeShowShopQuiz()) return
-  if (gameState.maybeShowChallenge()) return
-  
-  gameState.updateWeeklyHappinessStreaks()
-  checkForBadges()
-  checkForPennyHelp()
-  advanceGame()
+  // Normal game progression...
+  advanceGame();
 }
 
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
 const handleLevelUpClose = () => {
-  gameState.dismissLevelUp()
-  checkForBadges()
-  advanceGame()
-}
+  gameState.dismissLevelUp();
+  
+  // Send them back to the Home page, but add a "query" 
+  // so we know to skip straight to the goal selection
+  router.push({ path: '/', query: { step: 'goal' } });
+};
 
 const handleChallengeComplete = (wasCorrect) => {
   gameState.completeChallenge(wasCorrect)

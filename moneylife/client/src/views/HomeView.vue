@@ -355,6 +355,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGameStore } from '@/stores/gameState'
+import { useRoute } from 'vue-router'
 
 // Import images
 import toyImage from '@/assets/images/kids/dollToy.png'
@@ -366,6 +367,7 @@ import game2Image from '@/assets/images/teens/gameController.png'
 
 const router = useRouter()
 const store = useGameStore()
+const route = useRoute()
 
 const currentStep = ref('age')
 const selectedAge = ref(null)
@@ -395,6 +397,34 @@ const ageGroups = [
   { id: 'kids', range: '7-12', emoji: '🧒', label: 'Kids' },
   { id: 'teens', range: '13-17', emoji: '🧑', label: 'Teens' },
 ]
+
+onMounted(() => {
+  // Check if we were sent here from a Level Up
+  if (route.query.step === 'goal') {
+    currentStep.value = 'goal';
+    
+    // Auto-select the age and character based on what they already picked
+    selectedAge.value = store.ageGroup;
+    selectedCharacter.value = store.selectedCharacter;
+  }
+  
+  // Your existing fact interval logic...
+  setInterval(() => {
+    currentFactIndex.value = (currentFactIndex.value + 1) % funFacts.length
+  }, 5000)
+})
+
+// Optional: Filter goals so they see more expensive stuff in Level 2
+const goals = computed(() => {
+  const allPossibleGoals = selectedAge.value === 'kids' ? kidsGoals : teenGoals;
+  
+  if (store.level >= 2) {
+    // Show items that cost more than $30 for Level 2
+    return allPossibleGoals.filter(g => g.cost > 30);
+  }
+  return allPossibleGoals;
+})
+
 
 const kidsCharacters = [
   { 
