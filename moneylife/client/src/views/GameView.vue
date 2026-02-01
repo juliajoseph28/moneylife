@@ -411,7 +411,7 @@ const handleNext = () => {
   
   // Check for challenge (every 3 weeks)
   if (gameState.maybeShowChallenge()) return
-  
+  gameState.updateWeeklyHappinessStreaks()
   // Check for badges
   checkForBadges()
   

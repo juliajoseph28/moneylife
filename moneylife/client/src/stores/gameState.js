@@ -1,11 +1,10 @@
 // src/stores/gameState.js
 import { reactive } from 'vue'
 import { defineStore } from 'pinia'
-import { getRandomChallenge } from '@/data/challenges'
 import { badges } from '@/data/badges'
 
 // ============================================
-// LEVELS & PROGRESSION SYSTEM
+// LEVELS - Harder to reach
 // ============================================
 
 export const levels = [
@@ -15,6 +14,7 @@ export const levels = [
     icon: '🏡',
     description: 'Learning the basics at home!',
     requiredWeeks: 0,
+    requiredSavings: 0, // Must have positive balance
     unlocks: ['Home', 'Backyard'],
     color: '#4ECDC4'
   },
@@ -23,16 +23,18 @@ export const levels = [
     name: 'Neighborhood Explorer',
     icon: '🏘️',
     description: 'Exploring your neighborhood!',
-    requiredWeeks: 4,
+    requiredWeeks: 6,
+    requiredSavings: 15, // Must have saved at least $15
     unlocks: ['Park', 'Friend\'s House'],
-    color: '#6C63FF'
+    color: '#667eea'
   },
   {
     id: 3,
     name: 'Town Adventurer',
     icon: '🏙️',
     description: 'Discovering the town!',
-    requiredWeeks: 8,
+    requiredWeeks: 12,
+    requiredSavings: 40,
     unlocks: ['Mall', 'Arcade', 'Pet Store'],
     color: '#FF6B9D'
   },
@@ -41,40 +43,56 @@ export const levels = [
     name: 'Money Master',
     icon: '🌟',
     description: 'You\'re a financial superstar!',
-    requiredWeeks: 12,
+    requiredWeeks: 20,
+    requiredSavings: 100,
     unlocks: ['Bank', 'Investment Club'],
     color: '#FFD93D'
   }
 ]
 
 // ============================================
-// SKILLS SYSTEM
+// SKILLS
 // ============================================
 
 export const skillDefinitions = {
-  patience: {
-    name: 'Patience',
-    icon: '⏰',
-    color: '#6C63FF',
-    description: 'Waiting for good things!'
+  patience: { name: 'Patience', icon: '⏰', color: '#667eea', description: 'Waiting for good things!' },
+  planning: { name: 'Planning', icon: '📋', color: '#4ECDC4', description: 'Thinking ahead!' },
+  responsibility: { name: 'Responsibility', icon: '⭐', color: '#FF6B9D', description: 'Being dependable!' },
+  generosity: { name: 'Generosity', icon: '💝', color: '#FFD93D', description: 'Sharing with others!' }
+}
+
+// ============================================
+// NPC CHARACTERS
+// ============================================
+
+export const npcs = {
+  bestFriend: {
+    id: 'bestFriend',
+    name: 'Alex',
+    emoji: '👧',
+    relationship: 50, // 0-100
+    description: 'Your best friend from school'
   },
-  planning: {
-    name: 'Planning',
-    icon: '📋',
-    color: '#4ECDC4',
-    description: 'Thinking ahead!'
+  neighbor: {
+    id: 'neighbor',
+    name: 'Mr. Johnson',
+    emoji: '👴',
+    relationship: 50,
+    description: 'The friendly neighbor who offers odd jobs'
   },
-  responsibility: {
-    name: 'Responsibility',
-    icon: '⭐',
-    color: '#FF6B9D',
-    description: 'Being dependable!'
+  shopkeeper: {
+    id: 'shopkeeper',
+    name: 'Mrs. Chen',
+    emoji: '👩‍🦰',
+    relationship: 50,
+    description: 'Runs the corner store'
   },
-  generosity: {
-    name: 'Generosity',
-    icon: '💝',
-    color: '#FFD93D',
-    description: 'Sharing with others!'
+  petShelter: {
+    id: 'petShelter',
+    name: 'Pet Shelter',
+    emoji: '🐕',
+    relationship: 50,
+    description: 'Local animal shelter that needs help'
   }
 }
 
@@ -83,35 +101,75 @@ export const skillDefinitions = {
 // ============================================
 
 export const gameState = reactive({
-  // Basic stats
-  balance: 50,
+  // Basic stats - SMALLER ALLOWANCE
+  balance: 0, // Start with nothing!
   week: 1,
   health: 50,
   goal: 100,
-  weeklyIncome: 10,
+  weeklyIncome: 5, // Much smaller - $5 base
   ageGroup: 'kids',
+  
+  // Financial tracking
   totalSaved: 0,
   totalSpent: 0,
+  totalEarned: 0,
   savingChoices: 0,
   spendingChoices: 0,
-// Add to the gameState reactive object:
-  generousChoices: 0,
-  thoughtfulSpending: 0,
-
-  // Skills (0-100 each)
+  
+  // Debt & Consequences
+  inDebt: false,
+  debtAmount: 0,
+  badChoicesStreak: 0,
+  goodChoicesStreak: 0,
+  // Happiness Tracking
+  highHappinessStreak: 0,
+  stableHappinessStreak: 0,
+  peakHappiness: 50,
+  lowestHappiness: 50,
+  happinessRecoveries: 0,
+  wasLowHappiness: false,
+  missedOpportunities: [], // Things they can't buy anymore
+  
+  // Skills
   skills: {
-    patience: 20,
-    planning: 20,
-    responsibility: 20,
-    generosity: 20
+    patience: 10,
+    planning: 10,
+    responsibility: 10,
+    generosity: 10
   },
+  
+  // NPC Relationships
+  npcRelationships: {
+    bestFriend: 50,
+    neighbor: 50,
+    shopkeeper: 50,
+    petShelter: 50
+  },
+  
+  // Locked content
+  lockedItems: [], // Items locked due to poor choices
+  unlockedMissions: [], // Special missions earned by good behavior
+  lockedMissions: ['help_friend', 'pet_shelter_volunteer', 'neighborhood_sale'],
+  
+  // Story tracking
+  storyFlags: {
+    helpedFriendBefore: false,
+    donatedToShelter: false,
+    earnedExtraMoney: false,
+    boughtImpulsively: false,
+    missedFriendEvent: false,
+    learnedBudgeting: false
+  },
+  
+  // Needs vs Wants tracking
+  needsPurchased: 0,
+  wantsPurchased: 0,
   
   // Level & Progression
   currentLevel: 1,
   unlockedLocations: ['Home', 'Backyard'],
-  totalXP: 0,
   
-  // Challenges & Quizzes
+  // Challenges
   challengesCompleted: 0,
   correctAnswers: 0,
   shopQuizzesCompleted: 0,
@@ -120,35 +178,51 @@ export const gameState = reactive({
   // Badges
   badges: badges.map(b => ({ ...b })),
   
-  // Current states
+  // Popup states
   currentChallenge: null,
   showChallenge: false,
   showShopQuiz: false,
   currentShopQuiz: null,
   showLevelUp: false,
   newLevel: null,
+  showConsequence: false,
+  currentConsequence: null,
+  showPennyHelp: false,
+  pennySituation: null,
   
   // Character & Goal
   selectedCharacter: null,
   selectedGoal: null,
   
-  // Computed-like getters
+  // ============================================
+  // GETTERS
+  // ============================================
+  
   get progressPercent() {
-    return Math.min(100, Math.round((this.balance / this.goal) * 100))
+    return Math.min(100, Math.max(0, Math.round((this.balance / this.goal) * 100)))
+  },
+  
+  get canAfford() {
+    return (amount) => this.balance >= amount
+  },
+  
+  get isInDebt() {
+    return this.balance < 0
+  },
+  
+  get canProgressLevel() {
+    // Cannot progress if in debt!
+    if (this.balance < 0) return false
+    
+    const nextLevel = levels.find(l => l.id === this.currentLevel + 1)
+    if (!nextLevel) return false
+    
+    return this.week >= nextLevel.requiredWeeks && 
+           this.balance >= nextLevel.requiredSavings
   },
   
   get currentLevelData() {
     return levels.find(l => l.id === this.currentLevel) || levels[0]
-  },
-  
-  get nextLevelData() {
-    return levels.find(l => l.id === this.currentLevel + 1) || null
-  },
-  
-  get xpToNextLevel() {
-    const next = this.nextLevelData
-    if (!next) return 0
-    return next.requiredWeeks - this.week
   },
   
   // ============================================
@@ -161,42 +235,302 @@ export const gameState = reactive({
     this.selectedGoal = goal
     this.goal = goal.cost
     
+    // Set income based on character - MUCH SMALLER
     if (character === 'helper') {
-      this.weeklyIncome = 10
-      this.skills.responsibility = 30 // Helpers start with more responsibility
+      this.weeklyIncome = 6 // Helpers earn slightly more
+      this.skills.responsibility = 15
     } else if (character === 'saver') {
-      this.weeklyIncome = 8
-      this.skills.patience = 30 // Savers start with more patience
+      this.weeklyIncome = 5
+      this.skills.patience = 15
     }
     
+    // Start with first week's income only
     this.balance = this.weeklyIncome
+    this.totalEarned = this.weeklyIncome
   },
   
-  // Add skill points
+  // CHECK IF PLAYER CAN AFFORD SOMETHING
+  canSpend(amount) {
+    return this.balance >= amount
+  },
+  
+  // SPEND MONEY - WITH PROTECTION
+  spend(amount, isNeed = false) {
+    if (amount > this.balance) {
+      // Cannot spend more than you have!
+      return {
+        success: false,
+        reason: 'not_enough_money',
+        message: "You don't have enough money for this!"
+      }
+    }
+    
+    this.balance -= amount
+    this.totalSpent += amount
+    this.spendingChoices++
+    
+    if (isNeed) {
+      this.needsPurchased++
+    } else {
+      this.wantsPurchased++
+    }
+    
+    return { success: true }
+  },
+  
+  // EARN MONEY
+  earn(amount, source = 'allowance') {
+    this.balance += amount
+    this.totalEarned += amount
+    this.totalSaved += amount
+    this.savingChoices++
+    
+    if (source === 'chore' || source === 'job') {
+      this.addSkill('responsibility', 3)
+      this.storyFlags.earnedExtraMoney = true
+    }
+    
+    return { success: true }
+  },
+  // TRACK HAPPINESS CHANGES - Call this after any health change
+updateHappinessTracking() {
+  if (this.health > this.peakHappiness) {
+    this.peakHappiness = this.health
+  }
+  if (this.health < this.lowestHappiness) {
+    this.lowestHappiness = this.health
+  }
+  
+  if (this.health < 30) {
+    this.wasLowHappiness = true
+  }
+  if (this.wasLowHappiness && this.health >= 70) {
+    this.happinessRecoveries++
+    this.wasLowHappiness = false
+  }
+},
+
+// WEEKLY HAPPINESS CHECK - Call this at end of each week
+updateWeeklyHappinessStreaks() {
+  if (this.health >= 70) {
+    this.highHappinessStreak++
+  } else {
+    this.highHappinessStreak = 0
+  }
+  
+  if (this.health >= 40) {
+    this.stableHappinessStreak++
+  } else {
+    this.stableHappinessStreak = 0
+  }
+},
+  // SAVE MONEY (choosing not to spend)
+  save() {
+    this.savingChoices++
+    this.goodChoicesStreak++
+    this.badChoicesStreak = 0
+    this.addSkill('patience', 2)
+    this.addSkill('planning', 1)
+  },
+  
+  // TRACK BAD CHOICE
+  makeBadChoice() {
+    this.badChoicesStreak++
+    this.goodChoicesStreak = 0
+    
+    // Check for consequences
+    if (this.badChoicesStreak >= 3) {
+      return this.triggerConsequence()
+    }
+    
+    return null
+  },
+  
+  // TRIGGER CONSEQUENCE
+  triggerConsequence() {
+    const consequences = [
+      {
+        id: 'missed_friend_party',
+        title: "Uh Oh! You Can't Go!",
+        message: "Your friend Alex is having a birthday party, but you spent all your money and can't afford a gift. You have to miss the party.",
+        effect: () => {
+          this.npcRelationships.bestFriend -= 15
+          this.storyFlags.missedFriendEvent = true
+          this.health -= 10
+        },
+        lesson: "When we spend all our money on wants, we might miss out on important things with friends."
+      },
+      {
+        id: 'cant_help_shelter',
+        title: "The Shelter Needed Help",
+        message: "The pet shelter asked for donations to help sick puppies, but you don't have any money to give.",
+        effect: () => {
+          this.npcRelationships.petShelter -= 10
+          this.lockedMissions.push('pet_shelter_volunteer')
+        },
+        lesson: "Saving money lets us help others when they need it."
+      },
+      {
+        id: 'item_sold_out',
+        title: "Oh No! It's Gone!",
+        message: `The ${this.selectedGoal?.name || 'item'} you wanted went on sale, but you didn't have enough saved. Now it's sold out!`,
+        effect: () => {
+          this.missedOpportunities.push(this.selectedGoal?.name)
+          this.goal = Math.round(this.goal * 1.2) // Goal gets more expensive
+        },
+        lesson: "When we don't save, we miss good deals. The things we want might cost more later!"
+      },
+      {
+        id: 'no_emergency_fund',
+        title: "Emergency! No Money!",
+        message: "Your bike tire popped and you need $8 to fix it. But you spent all your money! Now you have to walk everywhere.",
+        effect: () => {
+          this.health -= 15
+          this.addSkill('planning', -5)
+        },
+        lesson: "It's smart to keep some money saved for emergencies - unexpected things that happen!"
+      }
+    ]
+    
+    const consequence = consequences[Math.floor(Math.random() * consequences.length)]
+    this.currentConsequence = consequence
+    this.showConsequence = true
+    
+    // Reset streak after consequence
+    this.badChoicesStreak = 0
+    
+    return consequence
+  },
+  
+  // APPLY CONSEQUENCE
+  applyConsequence() {
+    if (this.currentConsequence?.effect) {
+      this.currentConsequence.effect()
+    }
+    this.showConsequence = false
+    this.currentConsequence = null
+  },
+  
+  // CHECK IF PENNY SHOULD HELP
+  checkPennyHelp() {
+    // In debt
+    if (this.balance < 0) {
+      this.pennySituation = 'debt'
+      this.showPennyHelp = true
+      return true
+    }
+    
+    // Low balance after multiple weeks
+    if (this.balance < this.weeklyIncome && this.week > 3) {
+      this.pennySituation = 'low_balance'
+      this.showPennyHelp = true
+      return true
+    }
+    
+    // Spending more than saving
+    if (this.spendingChoices > this.savingChoices * 2 && this.week > 2) {
+      this.pennySituation = 'spending_spree'
+      this.showPennyHelp = true
+      return true
+    }
+    
+    // Low happiness
+    if (this.health < 25) {
+      this.pennySituation = 'low_happiness'
+      this.showPennyHelp = true
+      return true
+    }
+    
+    // Bad choices streak
+    if (this.badChoicesStreak >= 2) {
+      this.pennySituation = 'struggling'
+      this.showPennyHelp = true
+      return true
+    }
+    
+    return false
+  },
+  
+  dismissPennyHelp() {
+    this.showPennyHelp = false
+    this.pennySituation = null
+  },
+  
+  // NPC RELATIONSHIP
+  changeRelationship(npcId, amount) {
+    if (this.npcRelationships[npcId] !== undefined) {
+      this.npcRelationships[npcId] = Math.max(0, Math.min(100, this.npcRelationships[npcId] + amount))
+    }
+    
+    // Unlock/lock missions based on relationships
+    this.updateMissionAvailability()
+  },
+  
+  updateMissionAvailability() {
+    // Unlock help_friend mission if relationship is good
+    if (this.npcRelationships.bestFriend >= 60 && !this.storyFlags.missedFriendEvent) {
+      const index = this.lockedMissions.indexOf('help_friend')
+      if (index > -1) {
+        this.lockedMissions.splice(index, 1)
+        this.unlockedMissions.push('help_friend')
+      }
+    }
+    
+    // Unlock pet shelter if relationship and balance are good
+    if (this.npcRelationships.petShelter >= 50 && this.balance >= 10) {
+      const index = this.lockedMissions.indexOf('pet_shelter_volunteer')
+      if (index > -1) {
+        this.lockedMissions.splice(index, 1)
+        this.unlockedMissions.push('pet_shelter_volunteer')
+      }
+    }
+  },
+  
+  // LOCK AN ITEM
+  lockItem(itemName, reason) {
+    if (!this.lockedItems.find(i => i.name === itemName)) {
+      this.lockedItems.push({ name: itemName, reason, week: this.week })
+    }
+  },
+  
+  // CHECK IF ITEM IS LOCKED
+  isItemLocked(itemName) {
+    return this.lockedItems.some(i => i.name === itemName)
+  },
+  
+  // ADD SKILL
   addSkill(skillName, amount) {
     if (this.skills[skillName] !== undefined) {
       this.skills[skillName] = Math.min(100, Math.max(0, this.skills[skillName] + amount))
     }
   },
   
-  // Check for level up
+  // LEVEL UP CHECK - CANNOT PROGRESS IF IN DEBT
   checkLevelUp() {
+    // CANNOT level up if in debt
+    if (this.balance < 0) {
+      return false
+    }
+    
     for (let i = levels.length - 1; i >= 0; i--) {
       const level = levels[i]
-      if (this.week >= level.requiredWeeks && this.currentLevel < level.id) {
+      if (this.week >= level.requiredWeeks && 
+          this.balance >= level.requiredSavings &&
+          this.currentLevel < level.id) {
+        
         this.currentLevel = level.id
         this.newLevel = level
         this.showLevelUp = true
         
-        // Unlock new locations
+        // Unlock locations
         level.unlocks.forEach(loc => {
           if (!this.unlockedLocations.includes(loc)) {
             this.unlockedLocations.push(loc)
           }
         })
         
-        // Bonus for leveling up
-        this.balance += 5
+        // Small bonus
+        this.balance += 3
         this.addSkill('planning', 5)
         
         return true
@@ -205,37 +539,14 @@ export const gameState = reactive({
     return false
   },
   
-  // Maybe show shop quiz (every 4 weeks)
-  maybeShowShopQuiz() {
-    if (this.week > 1 && this.week % 4 === 0) {
-      this.currentShopQuiz = getRandomShopQuiz()
-      this.showShopQuiz = true
-      return true
-    }
-    return false
-  },
-  
-  // Complete shop quiz
-  completeShopQuiz(wasCorrect, savedAmount = 0) {
-    this.shopQuizzesCompleted++
-    if (wasCorrect) {
-      this.shopQuizzesCorrect++
-      this.balance += savedAmount
-      this.addSkill('planning', 5)
-      this.addSkill('patience', 3)
-    }
-    this.showShopQuiz = false
-    this.currentShopQuiz = null
-  },
-  
-  // Dismiss level up popup
   dismissLevelUp() {
     this.showLevelUp = false
     this.newLevel = null
   },
   
+  // CHALLENGES
   maybeShowChallenge() {
-    if (this.week > 1 && this.week % 3 === 0 && !this.showShopQuiz) {
+    if (this.week > 1 && this.week % 4 === 0 && !this.showShopQuiz) {
       this.currentChallenge = getRandomChallenge()
       this.showChallenge = true
       return true
@@ -248,7 +559,7 @@ export const gameState = reactive({
     if (wasCorrect) {
       this.correctAnswers++
       if (this.currentChallenge?.reward) {
-        this.balance += this.currentChallenge.reward
+        this.earn(this.currentChallenge.reward, 'quiz')
       }
       this.addSkill('planning', 3)
     }
@@ -256,89 +567,111 @@ export const gameState = reactive({
     this.currentChallenge = null
   },
   
-  checkBadges() {
+  // SHOP QUIZ
+  maybeShowShopQuiz() {
+    if (this.week > 1 && this.week % 5 === 0) {
+      this.currentShopQuiz = getRandomShopQuiz()
+      this.showShopQuiz = true
+      return true
+    }
+    return false
+  },
+  
+  completeShopQuiz(wasCorrect, savedAmount = 0) {
+    this.shopQuizzesCompleted++
+    if (wasCorrect) {
+      this.shopQuizzesCorrect++
+      if (savedAmount > 0) {
+        this.earn(savedAmount, 'smart_shopping')
+      }
+      this.addSkill('planning', 5)
+      this.addSkill('patience', 3)
+    }
+    this.showShopQuiz = false
+    this.currentShopQuiz = null
+  },
+  
+// BADGES
+checkBadges() {
   const newlyUnlocked = []
   this.badges.forEach(badge => {
     if (badge.unlocked) return
     let shouldUnlock = false
     
     switch (badge.id) {
-      case 'first_save': 
-        shouldUnlock = this.savingChoices >= 1
-        break
-      case 'quiz_master': 
-        shouldUnlock = this.correctAnswers >= 3
-        break
-      case 'goal_reached': 
-        shouldUnlock = this.balance >= this.goal
-        break
-      case 'week_5': 
-        shouldUnlock = this.week >= 5
-        break
-      case 'balanced': 
-        shouldUnlock = this.health >= 40 && this.savingChoices >= 3
-        break
-      case 'big_saver': 
-        shouldUnlock = this.balance >= 50
-        break
-      case 'shop_smart': 
-        shouldUnlock = this.shopQuizzesCorrect >= 2
-        break
-      case 'skill_master': 
-        shouldUnlock = Object.values(this.skills).some(s => s >= 50)
-        break
-      case 'level_up': 
-        shouldUnlock = this.currentLevel >= 2
-        break
-      case 'generous':
-        shouldUnlock = this.generousChoices >= 1
-        break
-      case 'wise_spender':
-        shouldUnlock = this.thoughtfulSpending >= 5
-        break
-      case 'money_master':
-        shouldUnlock = this.currentLevel >= 4
-        break
+      case 'first_save': shouldUnlock = this.savingChoices >= 1; break
+      case 'quiz_master': shouldUnlock = this.correctAnswers >= 3; break
+      case 'goal_reached': shouldUnlock = this.balance >= this.goal; break
+      case 'week_5': shouldUnlock = this.week >= 5; break
+      case 'balanced': shouldUnlock = this.health >= 50 && this.savingChoices >= 3; break
+      case 'big_saver': shouldUnlock = this.totalSaved >= 30; break
+      case 'shop_smart': shouldUnlock = this.shopQuizzesCorrect >= 2; break
+      case 'skill_master': shouldUnlock = Object.values(this.skills).some(s => s >= 50); break
+      case 'level_up': shouldUnlock = this.currentLevel >= 2; break
+      case 'generous': shouldUnlock = this.storyFlags.donatedToShelter; break
+      case 'good_friend': shouldUnlock = this.npcRelationships.bestFriend >= 80; break
+      case 'no_debt': shouldUnlock = this.week >= 8 && this.balance >= 0 && !this.inDebt; break
+      
+      // Happiness Badges
+      case 'joy_keeper': shouldUnlock = this.highHappinessStreak >= 3; break
+      case 'resilient_spirit': shouldUnlock = this.happinessRecoveries >= 1; break
+      case 'happy_saver': shouldUnlock = this.balance >= (this.goal * 0.5) && this.health >= 60; break
+      case 'wellness_warrior': shouldUnlock = this.stableHappinessStreak >= 8; break
+      case 'mood_master': shouldUnlock = this.happinessRecoveries >= 3; break
+      case 'thriving': shouldUnlock = this.health >= 80 && this.highHappinessStreak >= 1; break
     }
     
     if (shouldUnlock) {
       badge.unlocked = true
       newlyUnlocked.push(badge)
       
-      // Award skill points for unlocking badge
+      // Award skill points
       if (badge.skillKey === 'all') {
         Object.keys(this.skills).forEach(skill => {
-          this.addSkill(skill, badge.skillAmount)
+          this.addSkill(skill, badge.skillAmount || 5)
         })
       } else if (badge.skillKey) {
-        this.addSkill(badge.skillKey, badge.skillAmount)
+        this.addSkill(badge.skillKey, badge.skillAmount || 5)
       }
     }
   })
   return newlyUnlocked
 },
   
+  // RESET
   reset() {
-    this.balance = 50
+    this.balance = 0
     this.week = 1
     this.health = 50
     this.goal = 100
-    this.weeklyIncome = 10
+    this.weeklyIncome = 5
     this.totalSaved = 0
     this.totalSpent = 0
+    this.totalEarned = 0
     this.savingChoices = 0
     this.spendingChoices = 0
-    this.generousChoices = 0
-    this.thoughtfulSpending = 0
-    this.skills = {
-      patience: 20,
-      planning: 20,
-      responsibility: 20,
-      generosity: 20
+    this.inDebt = false
+    this.debtAmount = 0
+    this.badChoicesStreak = 0
+    this.goodChoicesStreak = 0
+    this.missedOpportunities = []
+    this.skills = { patience: 10, planning: 10, responsibility: 10, generosity: 10 }
+    this.npcRelationships = { bestFriend: 50, neighbor: 50, shopkeeper: 50, petShelter: 50 }
+    this.lockedItems = []
+    this.unlockedMissions = []
+    this.lockedMissions = ['help_friend', 'pet_shelter_volunteer', 'neighborhood_sale']
+    this.storyFlags = {
+      helpedFriendBefore: false,
+      donatedToShelter: false,
+      earnedExtraMoney: false,
+      boughtImpulsively: false,
+      missedFriendEvent: false,
+      learnedBudgeting: false
     }
+    this.needsPurchased = 0
+    this.wantsPurchased = 0
     this.currentLevel = 1
     this.unlockedLocations = ['Home', 'Backyard']
-    this.totalXP = 0
     this.challengesCompleted = 0
     this.correctAnswers = 0
     this.shopQuizzesCompleted = 0
@@ -350,10 +683,92 @@ export const gameState = reactive({
     this.currentShopQuiz = null
     this.showLevelUp = false
     this.newLevel = null
+    this.showConsequence = false
+    this.currentConsequence = null
+    this.showPennyHelp = false
+    this.pennySituation = null
     this.selectedCharacter = null
     this.selectedGoal = null
+    // Add these in reset() method
+    this.highHappinessStreak = 0
+    this.stableHappinessStreak = 0
+    this.peakHappiness = 50
+    this.lowestHappiness = 50
+    this.happinessRecoveries = 0
+    this.wasLowHappiness = false
   }
 })
+
+// ============================================
+// CHALLENGE DATA
+// ============================================
+
+const challenges = [
+  {
+    id: 1,
+    question: "You have $10. A toy costs $8 and lunch costs $5. What should you buy?",
+    emoji: "🤔",
+    options: [
+      { id: 'a', text: 'The toy - it looks fun!', correct: false },
+      { id: 'b', text: 'Lunch - I need to eat!', correct: true },
+      { id: 'c', text: 'Both - I\'ll figure it out', correct: false }
+    ],
+    explanation: 'Needs (like food) always come before wants (like toys). You need $5 for lunch, which leaves $5 to save!',
+    reward: 2
+  },
+  {
+    id: 2,
+    question: "What's the difference between a NEED and a WANT?",
+    emoji: "🎯",
+    options: [
+      { id: 'a', text: 'Needs are boring, wants are fun', correct: false },
+      { id: 'b', text: 'Needs keep us alive and safe, wants make us happy but we can wait', correct: true },
+      { id: 'c', text: 'They\'re the same thing', correct: false }
+    ],
+    explanation: 'Needs are things we must have (food, clothes, shelter). Wants are nice to have but we can live without them!',
+    reward: 2
+  },
+  {
+    id: 3,
+    question: "You get $5 allowance. Your friend wants you to buy candy ($3). What's smart?",
+    emoji: "🍬",
+    options: [
+      { id: 'a', text: 'Buy candy to make my friend happy', correct: false },
+      { id: 'b', text: 'Save my money - real friends don\'t need gifts every time', correct: true },
+      { id: 'c', text: 'Borrow money from someone else', correct: false }
+    ],
+    explanation: 'Good friends don\'t expect you to spend money on them. It\'s okay to say no!',
+    reward: 2
+  },
+  {
+    id: 4,
+    question: "You saved $20 for a game ($25). It goes on sale for $15! What do you do?",
+    emoji: "🎮",
+    options: [
+      { id: 'a', text: 'Buy it now and save $5!', correct: true },
+      { id: 'b', text: 'Wait for it to be free', correct: false },
+      { id: 'c', text: 'Buy two since it\'s cheap', correct: false }
+    ],
+    explanation: 'Waiting for sales is smart! You saved up AND got a deal. The extra $5 stays in your savings!',
+    reward: 3
+  },
+  {
+    id: 5,
+    question: "What happens if you spend ALL your money every week?",
+    emoji: "💸",
+    options: [
+      { id: 'a', text: 'Nothing bad - I\'ll get more next week', correct: false },
+      { id: 'b', text: 'I won\'t have money for emergencies or bigger goals', correct: true },
+      { id: 'c', text: 'I\'ll be the happiest!', correct: false }
+    ],
+    explanation: 'If you spend everything, you can\'t save for big things or handle surprises. Always save some!',
+    reward: 2
+  }
+]
+
+export const getRandomChallenge = () => {
+  return challenges[Math.floor(Math.random() * challenges.length)]
+}
 
 // ============================================
 // SHOP QUIZ DATA
@@ -362,101 +777,61 @@ export const gameState = reactive({
 const shopQuizzes = [
   {
     id: 1,
-    title: '🛒 Shop Smart Challenge!',
-    scenario: 'You need to buy a notebook for school. Which is the best deal?',
+    title: '🛒 Needs vs Wants!',
+    scenario: 'You have $10. Which should you buy?',
     options: [
-      { id: 'a', name: 'Fancy Notebook', price: 8, quality: 'Pretty but expensive', isBest: false },
-      { id: 'b', name: 'Basic Notebook', price: 3, quality: 'Simple but works great', isBest: true },
-      { id: 'c', name: 'Designer Notebook', price: 15, quality: 'Cool brand but pricey', isBest: false }
+      { id: 'a', name: 'New notebook for school', price: 4, quality: 'You need this for homework!', isBest: true, isNeed: true },
+      { id: 'b', name: 'Candy bar', price: 2, quality: 'Yummy but not necessary', isBest: false, isNeed: false },
+      { id: 'c', name: 'Stickers', price: 5, quality: 'Fun but you don\'t need them', isBest: false, isNeed: false }
     ],
-    correctId: 'b',
-    savings: 5,
-    tip: 'Sometimes the simple choice is the smartest! You saved $5!'
+    correctId: 'a',
+    savings: 3,
+    tip: 'Needs come first! Buy what you NEED, then think about wants.'
   },
   {
     id: 2,
-    title: '🍎 Snack Time Deal!',
-    scenario: 'You want an after-school snack. Which should you pick?',
+    title: '⏰ Wait or Buy Now?',
+    scenario: 'A game costs $30 now or $20 next month. You have $25.',
     options: [
-      { id: 'a', name: 'Vending Machine Chips', price: 2, quality: 'Quick but costs more', isBest: false },
-      { id: 'b', name: 'Snack from Home', price: 0, quality: 'Free and just as yummy!', isBest: true },
-      { id: 'c', name: 'Convenience Store Candy', price: 3, quality: 'Tasty but expensive', isBest: false }
+      { id: 'a', name: 'Buy now for $30', price: 30, quality: 'Can\'t afford it anyway!', isBest: false, isNeed: false },
+      { id: 'b', name: 'Wait and save $10!', price: 20, quality: 'Smart! Save money AND get the game!', isBest: true, isNeed: false },
+      { id: 'c', name: 'Borrow $5 from a friend', price: 30, quality: 'Now you owe someone!', isBest: false, isNeed: false }
     ],
     correctId: 'b',
-    savings: 2,
-    tip: 'Bringing snacks from home saves money every day!'
+    savings: 10,
+    tip: 'Patience pays! Waiting for sales or saving up is ALWAYS better than borrowing.'
   },
   {
     id: 3,
-    title: '🎮 Game Time!',
-    scenario: 'You want to play a new video game. Best choice?',
+    title: '🎁 Help a Friend?',
+    scenario: 'Your friend\'s birthday is coming. You have $8 saved for your goal.',
     options: [
-      { id: 'a', name: 'Buy New ($60)', price: 60, quality: 'Brand new, full price', isBest: false },
-      { id: 'b', name: 'Wait for Sale ($30)', price: 30, quality: 'Same game, half price!', isBest: true },
-      { id: 'c', name: 'Buy Used ($40)', price: 40, quality: 'Pre-owned, decent price', isBest: false }
+      { id: 'a', name: 'Expensive gift ($10)', price: 10, quality: 'You don\'t have enough!', isBest: false, isNeed: false },
+      { id: 'b', name: 'Homemade card + small gift ($3)', price: 3, quality: 'Thoughtful AND affordable!', isBest: true, isNeed: false },
+      { id: 'c', name: 'Skip the birthday', price: 0, quality: 'That\'s not very nice...', isBest: false, isNeed: false }
     ],
     correctId: 'b',
-    savings: 30,
-    tip: 'Patience pays off! Waiting for sales can save you 50%!'
-  },
-  {
-    id: 4,
-    title: '👕 Clothes Shopping!',
-    scenario: 'You need a new t-shirt. Which is smartest?',
-    options: [
-      { id: 'a', name: 'Brand Name Shirt', price: 25, quality: 'Cool logo, high price', isBest: false },
-      { id: 'b', name: 'Sale Rack Shirt', price: 8, quality: 'Nice shirt, great price!', isBest: true },
-      { id: 'c', name: 'Designer Shirt', price: 40, quality: 'Fancy but way too much', isBest: false }
-    ],
-    correctId: 'b',
-    savings: 17,
-    tip: 'The sale rack has hidden treasures! Brand names aren\'t everything.'
-  },
-  {
-    id: 5,
-    title: '🎬 Movie Night!',
-    scenario: 'You want to watch a movie with friends. Best option?',
-    options: [
-      { id: 'a', name: 'Theater + Snacks', price: 25, quality: 'Fun but expensive', isBest: false },
-      { id: 'b', name: 'Home Movie Night', price: 3, quality: 'Popcorn at home, same fun!', isBest: true },
-      { id: 'c', name: 'Theater Only', price: 15, quality: 'No snacks, still pricey', isBest: false }
-    ],
-    correctId: 'b',
-    savings: 22,
-    tip: 'Home movie nights are just as fun and way cheaper!'
-  },
-  {
-    id: 6,
-    title: '🎁 Birthday Gift!',
-    scenario: 'Your friend\'s birthday is coming. What do you do?',
-    options: [
-      { id: 'a', name: 'Expensive Store Gift', price: 30, quality: 'Nice but pricey', isBest: false },
-      { id: 'b', name: 'Handmade Card + Small Gift', price: 10, quality: 'Thoughtful and personal!', isBest: true },
-      { id: 'c', name: 'Last-Minute Gift Card', price: 20, quality: 'Easy but less personal', isBest: false }
-    ],
-    correctId: 'b',
-    savings: 20,
-    tip: 'Thoughtful gifts mean more than expensive ones!'
+    savings: 5,
+    tip: 'Thoughtful gifts don\'t have to be expensive! Homemade things show you care.'
   }
 ]
 
 export const getRandomShopQuiz = () => {
-  const randomIndex = Math.floor(Math.random() * shopQuizzes.length)
-  return shopQuizzes[randomIndex]
+  return shopQuizzes[Math.floor(Math.random() * shopQuizzes.length)]
 }
 
 // ============================================
-// PINIA STORE (for compatibility)
+// PINIA STORE
 // ============================================
 
 export const useGameStore = defineStore('game', {
   state: () => ({
-    balance: 50,
+    balance: 0,
     week: 1,
     level: 1,
     health: 50,
     goal: 100,
-    weeklyIncome: 10,
+    weeklyIncome: 5,
     ageGroup: 'kids',
     totalSaved: 0,
     totalSpent: 0,
@@ -466,12 +841,6 @@ export const useGameStore = defineStore('game', {
     selectedGoal: null,
   }),
   
-  getters: {
-    progressPercent: (state) => {
-      return Math.min(100, Math.round((state.balance / state.goal) * 100))
-    }
-  },
-  
   actions: {
     initializeGame(character, goal) {
       this.reset()
@@ -480,24 +849,22 @@ export const useGameStore = defineStore('game', {
       this.goal = goal.cost
       
       if (character === 'helper') {
-        this.weeklyIncome = 10
+        this.weeklyIncome = 6
       } else if (character === 'saver') {
-        this.weeklyIncome = 8
+        this.weeklyIncome = 5
       }
       
       this.balance = this.weeklyIncome
-      
-      // Sync with reactive gameState
       gameState.initializeGame(character, goal)
     },
     
     reset() {
-      this.balance = 50
+      this.balance = 0
       this.week = 1
       this.level = 1
       this.health = 50
       this.goal = 100
-      this.weeklyIncome = 10
+      this.weeklyIncome = 5
       this.totalSaved = 0
       this.totalSpent = 0
       this.savingChoices = 0
