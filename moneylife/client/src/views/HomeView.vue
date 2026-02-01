@@ -18,12 +18,12 @@
         
         <!-- Main Mascot -->
         <div class="mascot-scene">
-          <img src="@/assets/images/kids/happy piggy.png" class="main-mascot" alt="Penny" />
+          <img src="@/assets/images/kids/money-bag.png" class="main-mascot" alt="Penny" />
           <div class="mascot-glow"></div>
         </div>
         
         <!-- What You'll Learn -->
-        <div class="learn-preview">
+        <div v-if= "selectedAge === 'kids' "class="learn-preview">
           <h3 class="learn-title">What You'll Learn</h3>
           <div class="learn-cards">
             <div class="learn-card">
@@ -44,6 +44,30 @@
             </div>
           </div>
         </div>
+
+
+        <div v-if="selectedAge === 'teens'" class="learn-preview">
+          <h3 class="learn-title">What You'll Learn</h3>
+          <div class="learn-cards">
+            <div class="learn-card">
+              <span class="learn-icon">📈</span>
+              <span class="learn-text">Investing</span>
+            </div>
+            <div class="learn-card">
+              <span class="learn-icon">🧾</span>
+              <span class="learn-text">Money Manangement</span>
+            </div>
+            <div class="learn-card">
+              <span class="learn-icon">📊</span>
+              <span class="learn-text">Credit and Debit</span>
+            </div>
+            <div class="learn-card">
+              <span class="learn-icon">‼️</span>
+              <span class="learn-text">Emergency Funds</span>
+            </div>
+          </div>
+        </div>
+
         
         <!-- Fun Fact -->
         <div class="fun-fact">
@@ -72,9 +96,9 @@
           <div class="welcome-bubble">
             <div class="bubble-arrow"></div>
             <p class="bubble-text">
-              <span class="wave">👋</span> Hiya friend! I'm <strong class="mascot-name">Penny!</strong>
+              <span class="wave">👋</span> Hey there! I'm <strong class="mascot-name">Penny!</strong>
             </p>
-            <p class="bubble-text">Ready to play a super fun money game with me?</p>
+            <p class="bubble-text">Ready to learn a ton about money?</p>
           </div>
           
           <!-- Age Selection -->
