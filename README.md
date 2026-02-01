@@ -4,7 +4,7 @@ A financial simulation game built with modern web technologies, helping players 
 
 ## 🎮 Live Demo
 
-**Play Now:** [https://moneylife-one.vercel.app/game](https://moneylife-one.vercel.app/game)
+**Play Now:** https://moneylife-one.vercel.app/
 
 ## 📖 About
 
