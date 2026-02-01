@@ -8,14 +8,14 @@
           <img src="@/assets/images/kids/pig.png" class="penny-image" alt="Penny" />
           <div class="mood-indicator">{{ moodEmoji }}</div>
         </div>
-      </div>
+      </div> 
       
       <!-- Message Section -->
       <div class="message-section">
         <div class="message-header">
           <span class="header-icon">{{ headerIcon }}</span>
           <h2 class="header-title">{{ headerTitle }}</h2>
-        </div>
+        </div> 
         
         <div class="message-bubble">
           <p class="penny-says">Penny says:</p>

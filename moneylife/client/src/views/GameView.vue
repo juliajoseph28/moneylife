@@ -153,7 +153,11 @@
       :challenge="gameState.currentChallenge"
       @complete="handleChallengeComplete"
     />
-    
+    <GeminiChatbox
+     :show="showGeminiChat"
+     :initial-context="chatContext"
+     @close="showGeminiChat = false"
+    />
     <!-- Shop Quiz Popup -->
     <ShopQuizPopup
       :show="gameState.showShopQuiz"
@@ -189,6 +193,8 @@
 </template>
 
 <script setup>
+// Add this with your other component imports
+import GeminiChatbox from '@/components/GeminiChatbox.vue'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { gameState, levels, skillDefinitions } from '@/stores/gameState'
@@ -221,6 +227,9 @@ const router = useRouter()
 const showBadge = ref(false)
 const earnedBadge = ref(null)
 const scenarioIndex = ref(0)
+// Gemini Chat state
+const showGeminiChat = ref(false)
+const chatContext = ref('')
 
 // NEW: Penny Help state
 const showPennyHelp = ref(false)

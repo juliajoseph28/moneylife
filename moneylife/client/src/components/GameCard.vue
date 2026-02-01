@@ -1,3 +1,4 @@
+<!-- src/components/GameCard.vue -->
 <template>
   <div class="game-card">
     <!-- Question View -->
@@ -23,7 +24,7 @@
             <button
               v-for="choice in scenario.choices"
               :key="choice.id"
-              @click="selectChoice(choice)"
+              @click="handleChoiceClick(choice)"
               class="choice-btn"
               :class="getChoiceClass(choice)"
             >
@@ -34,12 +35,22 @@
                   <span v-if="choice.effects?.health" class="effect-tag health">
                     ❤️ {{ choice.effects.health > 0 ? '+' : '' }}{{ choice.effects.health }}
                   </span>
+                  <!-- Show "Can't Afford" warning -->
+                  <span v-if="!canAffordChoice(choice)" class="effect-tag cant-afford">
+                    🚫 Need ${{ getAmountNeeded(choice) }} more
+                  </span>
                 </span>
               </div>
-              <span class="choice-cost" :class="{ positive: choice.effects?.balance > 0 }">
+              <span class="choice-cost" :class="getCostClass(choice)">
                 {{ formatCost(choice) }}
               </span>
             </button>
+          </div>
+          
+          <!-- Current Balance Reminder -->
+          <div class="balance-reminder">
+            <span class="balance-icon">🪙</span>
+            <span class="balance-text">Your balance: <strong>${{ currentBalance }}</strong></span>
           </div>
         </div>
       </div>
@@ -83,12 +94,35 @@
         </div>
       </div>
     </div>
+    
+        <!-- Penny Advice Popup (when can't afford) -->
+    <PennyAdvice
+      :show="showPennyAdvice"
+      :item-name="attemptedChoice?.text || 'this item'"
+      :item-cost="Math.abs(attemptedChoice?.effects?.balance || 0)"
+      :current-balance="currentBalance"
+      :weekly-income="weeklyIncome"
+      :goal-name="goalName"
+      :goal-cost="goalCost"
+      @close="closePennyAdvice"
+      @choose-different="closePennyAdvice"
+      @open-chat="openChatFromAdvice"
+    />
+    
+    <!-- Gemini Chatbox -->
+    <GeminiChatbox
+      :show="showGeminiChat"
+      :initial-context="chatContext"
+      @close="showGeminiChat = false"
+    />
   </div>
 </template>
 
 <script setup>
+import GeminiChatbox from '@/components/GeminiChatbox.vue'
 import { ref, computed } from 'vue'
 import { gameState } from '@/stores/gameState'
+import PennyAdvice from '@/components/PennyAdvice.vue'
 
 const props = defineProps({
   scenario: Object
@@ -98,9 +132,18 @@ const emit = defineEmits(['choice', 'next'])
 
 const selectedChoice = ref(null)
 const showOutcome = ref(false)
+const showPennyAdvice = ref(false)
+const attemptedChoice = ref(null)
+const showGeminiChat = ref(false)
+const chatContext = ref('')
 
+// Get current game state values
 const getCurrentWeek = () => gameState.week || 1
 const getCurrentLevel = () => gameState.currentLevel || 1
+const currentBalance = computed(() => gameState.balance || 0)
+const weeklyIncome = computed(() => gameState.weeklyIncome || 5)
+const goalName = computed(() => gameState.selectedGoal?.name || 'your prize')
+const goalCost = computed(() => gameState.goal || 100)
 
 const outcomeIcon = computed(() => {
   if (!selectedChoice.value) return '📝'
@@ -112,10 +155,35 @@ const outcomeIcon = computed(() => {
   }
 })
 
+// Check if user can afford a choice
+const canAffordChoice = (choice) => {
+  const cost = choice.effects?.balance || 0
+  // If it's earning money (positive) or free, always affordable
+  if (cost >= 0) return true
+  // Check if they have enough to cover the cost
+  return currentBalance.value >= Math.abs(cost)
+}
+
+// Get amount needed for a choice
+const getAmountNeeded = (choice) => {
+  const cost = Math.abs(choice.effects?.balance || 0)
+  return Math.max(0, cost - currentBalance.value)
+}
+
 const getChoiceClass = (choice) => {
-  if (choice.effects?.balance > 0) return 'earns-money'
-  if (choice.effects?.balance < 0) return 'costs-money'
+  const canAfford = canAffordChoice(choice)
+  const balance = choice.effects?.balance || 0
+  
+  if (!canAfford) return 'cant-afford'
+  if (balance > 0) return 'earns-money'
+  if (balance < 0) return 'costs-money'
   return 'free-choice'
+}
+
+const getCostClass = (choice) => {
+  if (!canAffordChoice(choice)) return 'unaffordable'
+  if (choice.effects?.balance > 0) return 'positive'
+  return ''
 }
 
 const formatCost = (choice) => {
@@ -125,12 +193,40 @@ const formatCost = (choice) => {
   return '$0'
 }
 
+// Handle choice click - check affordability first
+const handleChoiceClick = (choice) => {
+  if (!canAffordChoice(choice)) {
+    // Can't afford - show Penny's advice!
+    attemptedChoice.value = choice
+    showPennyAdvice.value = true
+    return
+  }
+  
+  // Can afford - proceed with choice
+  selectChoice(choice)
+}
+// Open Gemini chat with context about what they're struggling with
+const openChatFromAdvice = () => {
+  const choice = attemptedChoice.value
+  const cost = Math.abs(choice?.effects?.balance || 0)
+  const needed = cost - currentBalance.value
+  
+  chatContext.value = `The child tried to spend $${cost} on "${choice?.text}" but only has $${currentBalance.value}. They need $${needed} more. They're looking at the savings timeline but still need help understanding. Please explain in very simple, friendly language why they can't afford this right now and how saving works.`
+  
+  showPennyAdvice.value = false
+  showGeminiChat.value = true
+}
 const selectChoice = (choice) => {
   selectedChoice.value = choice
   emit('choice', choice)
   setTimeout(() => {
     showOutcome.value = true
   }, 300)
+}
+
+const closePennyAdvice = () => {
+  showPennyAdvice.value = false
+  attemptedChoice.value = null
 }
 
 const nextWeek = () => {
@@ -302,6 +398,23 @@ const nextWeek = () => {
   background: linear-gradient(135deg, #FFFDF0 0%, white 100%);
 }
 
+/* Can't Afford Styling */
+.choice-btn.cant-afford {
+  border-color: #DDD;
+  background: #F5F5F5;
+  opacity: 0.8;
+}
+
+.choice-btn.cant-afford:hover {
+  transform: translateX(4px);
+  border-color: #FF6B9D;
+  background: linear-gradient(135deg, #FFF0F5 0%, #F5F5F5 100%);
+}
+
+.choice-btn.cant-afford .choice-emoji {
+  filter: grayscale(50%);
+}
+
 .choice-emoji {
   font-size: 32px;
   flex-shrink: 0;
@@ -323,6 +436,7 @@ const nextWeek = () => {
 .choice-effects {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .effect-tag {
@@ -330,6 +444,12 @@ const nextWeek = () => {
   padding: 2px 8px;
   border-radius: 8px;
   background: #F8F8F8;
+}
+
+.effect-tag.cant-afford {
+  background: #FFE0E0;
+  color: #FF6B6B;
+  font-weight: 600;
 }
 
 .choice-cost {
@@ -345,6 +465,39 @@ const nextWeek = () => {
 .choice-cost.positive {
   color: #4ECDC4;
   background: #F0FFFD;
+}
+
+.choice-cost.unaffordable {
+  color: #999;
+  background: #EEE;
+  text-decoration: line-through;
+}
+
+/* Balance Reminder */
+.balance-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #FFF8F0 0%, #FFE8D6 100%);
+  border-radius: 16px;
+  border: 2px solid #FFE66D;
+}
+
+.balance-icon {
+  font-size: 20px;
+}
+
+.balance-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.balance-text strong {
+  color: #4ECDC4;
+  font-size: 16px;
 }
 
 /* =====================
