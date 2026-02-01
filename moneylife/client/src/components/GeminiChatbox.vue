@@ -203,27 +203,86 @@ User question: ${message}
 Respond as Penny would - friendly, helpful, and focused on money education.`
 
   try {
-    // Call our backend API instead of Gemini directly
-    const response = await fetch('/api/gemini', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt: prompt
+    // Determine API URL based on environment
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    const apiUrl = isLocalhost ? '/api/gemini' : 'https://cors-anywhere.herokuapp.com/https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+
+    // For production, call Gemini API directly with CORS proxy
+    if (!isLocalhost) {
+      const apiKey = 'AIzaSyAHUZmLsBAonE7Tb50gg0fc-WN9aN0FUnk' // This should be moved to env but for now...
+
+      const response = await fetch(apiUrl + `?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+          },
+          safetySettings: [
+            {
+              category: 'HARM_CATEGORY_HARASSMENT',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+            },
+            {
+              category: 'HARM_CATEGORY_HATE_SPEECH',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+            },
+            {
+              category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+            },
+            {
+              category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+              threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+            }
+          ]
+        })
       })
-    })
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`)
-    }
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status} ${response.statusText}`)
+      }
 
-    const data = await response.json()
+      const data = await response.json()
 
-    if (data.response) {
-      return data.response
+      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+        return data.candidates[0].content.parts[0].text
+      } else {
+        throw new Error('Unexpected response format from Gemini API')
+      }
     } else {
-      throw new Error('Unexpected response format from API')
+      // For localhost, use the proxy
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.response) {
+        return data.response
+      } else {
+        throw new Error('Unexpected response format from API')
+      }
     }
   } catch (error) {
     console.error('API call failed:', error)
