@@ -332,4 +332,8 @@ const handleContinue = () => {
     height: 60px;
   }
 }
+<<<<<<< HEAD
 </style>
+=======
+</style>
+>>>>>>> 629e6c3490457f9dbfe89280f9925e28f13cda14

@@ -164,7 +164,7 @@
         </div>
 
         <!-- STEP 2: Character Selection -->
-        <div v-if="currentStep === 'character' && selectedAge === 'kids'" class="step-content">
+        <div v-if="currentStep === 'character'" class="step-content">
           
           <button class="back-btn" @click="prevStep">
             <span>←</span> Back
@@ -177,7 +177,7 @@
           
           <div class="character-grid">
             <button
-              v-for="char in kidsCharacters"
+              v-for="char in characters"
               :key="char.id"
               class="character-card"
               :class="{ selected: selectedCharacter === char.id }"
@@ -210,7 +210,7 @@
         </div>
 
         <!-- STEP 3: Goal Selection -->
-        <div v-if="currentStep === 'goal' && selectedAge === 'kids'" class="step-content">
+        <div v-if="currentStep === 'goal'" class="step-content">
           
           <button class="back-btn" @click="prevStep">
             <span>←</span> Back
@@ -223,7 +223,7 @@
           
           <div class="goal-grid">
             <button
-              v-for="goal in kidsGoals"
+              v-for="goal in goals"
               :key="goal.name"
               class="goal-card"
               :class="{ selected: selectedGoal?.name === goal.name }"
@@ -258,7 +258,7 @@
         </div>
 
         <!-- STEP 4: Tutorial -->
-        <div v-if="currentStep === 'tutorial' && selectedAge === 'kids'" class="step-content tutorial-step">
+        <div v-if="currentStep === 'tutorial'" class="step-content tutorial-step">
           
           <div class="tutorial-card">
             <h1 class="tutorial-title">How To Play! 🎮</h1>
@@ -392,8 +392,34 @@ const kidsGoals = [
   { name: 'Video Game', cost: 35, image: gameImage, color: '#6C63FF' }
 ]
 
+const teenCharacters = [
+  { 
+    id: 'part-timer', 
+    name: 'Part-Time Worker', 
+    emoji: '🛍️', 
+    description: 'You work at a store and earn weekly pay!', 
+    income: '$50'
+  },
+  { 
+    id: 'freelancer', 
+    name: 'Freelance Star', 
+    emoji: '💻', 
+    description: 'You do gigs online and save your earnings!', 
+    income: '$40'
+  }
+]
+
+const teenGoals = [
+  { name: 'New Phone', cost: 200, image: toyImage, color: '#FF6B9D' }, // Using same image for now
+  { name: 'Gaming Setup', cost: 300, image: gameImage, color: '#4ECDC4' },
+  { name: 'Concert Tickets', cost: 150, image: artImage, color: '#6C63FF' }
+]
+
+const characters = computed(() => selectedAge.value === 'kids' ? kidsCharacters : teenCharacters)
+const goals = computed(() => selectedAge.value === 'kids' ? kidsGoals : teenGoals)
+
 const calculateWeeks = (cost) => {
-  const char = kidsCharacters.find(c => c.id === selectedCharacter.value)
+  const char = characters.value.find(c => c.id === selectedCharacter.value)
   if (!char) return '?'
   const income = parseInt(char.income.replace(/\D/g, ''))
   return Math.ceil(cost / (income * 0.6))
@@ -426,14 +452,18 @@ const prevStep = () => {
 }
 
 const launchGame = () => {
-  const char = kidsCharacters.find(c => c.id === selectedCharacter.value)
+  const char = characters.value.find(c => c.id === selectedCharacter.value)
   const income = parseInt(char.income.replace(/\D/g, ''))
   
   store.ageGroup = selectedAge.value
   store.weeklyIncome = income
   store.initializeGame(selectedCharacter.value, selectedGoal.value)
   
-  router.push('/game')
+  if (selectedAge.value === 'teens') {
+    router.push('/game-teen')
+  } else {
+    router.push('/game')
+  }
 }
 </script>
 
