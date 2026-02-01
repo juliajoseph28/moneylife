@@ -89,11 +89,19 @@
       
     </div>
   </div>
+
+  <!-- Gemini AI Chatbox -->
+  <GeminiChatbox
+    :show="showChatbox"
+    :initialContext="`The user is in situation: ${props.situation}. They clicked 'I Need More Help' from the Penny Help popup.`"
+    @close="showChatbox = false"
+  />
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { gameState } from '@/stores/gameState'
+import GeminiChatbox from '@/components/GeminiChatbox.vue'
 
 const props = defineProps({
   show: Boolean,
@@ -110,6 +118,7 @@ const isLoadingAI = ref(false)
 const showQuiz = ref(true)
 const quizAnswered = ref(false)
 const selectedAnswer = ref(null)
+const showChatbox = ref(false)
 
 // Situation-based content
 const situationContent = {
@@ -315,10 +324,9 @@ const handleClose = () => {
   aiFeedback.value = null
 }
 
-// Get more help - could open a tips page or more detailed help
+// Get more help - opens Gemini AI chatbox
 const getMoreHelp = () => {
-  // For now, generate new AI feedback
-  fetchAIFeedback()
+  showChatbox.value = true
 }
 
 // Fetch AI feedback when shown
