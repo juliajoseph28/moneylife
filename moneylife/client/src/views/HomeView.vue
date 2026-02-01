@@ -402,14 +402,14 @@ const kidsCharacters = [
     name: 'Super Helper', 
     emoji: '🦸', 
     description: 'You help with chores and earn allowance!', 
-    income: '$10'
+    income: '$6'
   },
   { 
     id: 'saver', 
     name: 'Saving Star', 
     emoji: '⭐', 
     description: 'You find coins and save birthday money!', 
-    income: '$8'
+    income: '$4'
   }
 ]
 
