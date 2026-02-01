@@ -1,24 +1,16 @@
 {
-  "name": "moneylife",
+  "name": "moneylife-server",
   "version": "1.0.0",
-  "description": "Financial literacy game for young children from underserved communities for ElleHacks 2026.",
+  "description": "Backend server for MoneyLife game",
   "main": "index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
-  "dev": "cd client && npm run dev",
-  "build": "cd client && npm run build",
-  "preview": "cd client && npm run preview",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/juliajoseph28/moneylife.git"
+    "start": "node index.js",
+    "dev": "node index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/juliajoseph28/moneylife/issues"
-  },
-  "homepage": "https://github.com/juliajoseph28/moneylife#readme"
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  }
 }

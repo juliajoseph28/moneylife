@@ -1,1 +1,16 @@
-{}
+{
+  "name": "moneylife",
+  "version": "1.0.0",
+  "description": "Financial literacy game for young children",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "client": "cd moneylife/client && npm run dev",
+    "server": "cd moneylife/server && npm run dev",
+    "build": "cd moneylife/client && npm run build",
+    "preview": "cd moneylife/client && npm run preview",
+    "install-all": "npm install && cd moneylife/client && npm install && cd ../server && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

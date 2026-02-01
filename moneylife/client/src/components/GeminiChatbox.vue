@@ -202,64 +202,31 @@ User question: ${message}
 
 Respond as Penny would - friendly, helpful, and focused on money education.`
 
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-
-  if (!apiKey) {
-    throw new Error('Gemini API key not found. Please add VITE_GEMINI_API_KEY to your .env file.')
-  }
-
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    // Call our backend API instead of Gemini directly
+    const response = await fetch('/api/gemini', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
-        },
-        safetySettings: [
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          }
-        ]
+        prompt: prompt
       })
     })
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`)
+      throw new Error(`API error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
 
-    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
-      return data.candidates[0].content.parts[0].text
+    if (data.response) {
+      return data.response
     } else {
-      throw new Error('Unexpected response format from Gemini API')
+      throw new Error('Unexpected response format from API')
     }
   } catch (error) {
-    console.error('Gemini API call failed:', error)
+    console.error('API call failed:', error)
     throw error
   }
 }
