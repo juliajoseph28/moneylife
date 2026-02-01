@@ -282,7 +282,7 @@ export const gameState = reactive({
     } else if (character === 'saver') {
       this.weeklyIncome = 4
       this.skills.patience = 15
-    } else if (character === 'part-time') {
+    } else if (character === 'part-timer') {
       this.weeklyIncome = 50
       this.skills.patience = 15
     } else if (character === 'freelancer') {
@@ -790,7 +790,7 @@ export const gameState = reactive({
     this.week = 1
     this.health = 50
     this.goal = 100
-    this.weeklyIncome = 5
+    this.weeklyIncome = 50
     this.totalSaved = 0
     this.totalSpent = 0
     this.totalEarned = 0
@@ -1000,7 +1000,12 @@ export const useGameStore = defineStore('game', {
         this.weeklyIncome = 6
       } else if (character === 'saver') {
         this.weeklyIncome = 5
+      } else if (character === 'part-timer') {
+        this.weeklyIncome = 50
+      } else if (character === 'freelancer') {
+        this.weeklyIncome = 40
       }
+
       
       this.balance = this.weeklyIncome
       gameState.initializeGame(character, goal)
@@ -1012,7 +1017,7 @@ export const useGameStore = defineStore('game', {
       this.level = 1
       this.health = 50
       this.goal = 100
-      this.weeklyIncome = 5
+      this.weeklyIncome = 50
       this.totalSaved = 0
       this.totalSpent = 0
       this.savingChoices = 0
