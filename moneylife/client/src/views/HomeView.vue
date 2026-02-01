@@ -89,7 +89,6 @@
                 :class="{ 
                   selected: selectedAge === age.id,
                   'kids-style': age.id === 'kids',
-                  'tween-style': age.id === 'tweens',
                   'teen-style': age.id === 'teens'
                 }"
                 @click="selectAge(age.id)"
@@ -366,9 +365,8 @@ onMounted(() => {
 })
 
 const ageGroups = [
-  { id: 'kids', range: '8-10', emoji: '🧒', label: 'Kids' },
-  { id: 'tweens', range: '11-13', emoji: '🧑', label: 'Tweens' },
-  { id: 'teens', range: '14-16', emoji: '🧑‍🎓', label: 'Teens' }
+  { id: 'kids', range: '7-12', emoji: '🧒', label: 'Kids' },
+  { id: 'teens', range: '13-17', emoji: '🧑', label: 'Teens' },
 ]
 
 const kidsCharacters = [
@@ -774,7 +772,7 @@ const launchGame = () => {
 
 .age-options {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
@@ -801,11 +799,6 @@ const launchGame = () => {
 .age-card.selected.kids-style {
   border-color: #FF6B9D;
   background: #FFF0F5;
-}
-
-.age-card.selected.tween-style {
-  border-color: #4ECDC4;
-  background: #F0FFFD;
 }
 
 .age-card.selected.teen-style {
