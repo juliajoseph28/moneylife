@@ -23,7 +23,7 @@
         </div>
         
         <!-- What You'll Learn -->
-        <div v-if= "selectedAge === 'kids' "class="learn-preview">
+        <div v-if="selectedAge === 'kids'" class="learn-preview">
           <h3 class="learn-title">What You'll Learn</h3>
           <div class="learn-cards">
             <div class="learn-card">
@@ -45,7 +45,6 @@
           </div>
         </div>
 
-
         <div v-if="selectedAge === 'teens'" class="learn-preview">
           <h3 class="learn-title">What You'll Learn</h3>
           <div class="learn-cards">
@@ -55,7 +54,7 @@
             </div>
             <div class="learn-card">
               <span class="learn-icon">🧾</span>
-              <span class="learn-text">Money Manangement</span>
+              <span class="learn-text">Money Management</span>
             </div>
             <div class="learn-card">
               <span class="learn-icon">📊</span>
@@ -67,7 +66,6 @@
             </div>
           </div>
         </div>
-
         
         <!-- Fun Fact -->
         <div class="fun-fact">
@@ -291,7 +289,7 @@
               <div class="tut-step">
                 <div class="step-number">1</div>
                 <div class="step-icon">📅</div>
-                <div class="step-content">
+                <div class="step-content-inner">
                   <strong>Every week, stuff happens!</strong>
                   <span>You'll face fun money decisions</span>
                 </div>
@@ -300,7 +298,7 @@
               <div class="tut-step">
                 <div class="step-number">2</div>
                 <div class="step-icon">🤔</div>
-                <div class="step-content">
+                <div class="step-content-inner">
                   <strong>You decide: spend or save?</strong>
                   <span>Each choice affects your money & happiness</span>
                 </div>
@@ -309,7 +307,7 @@
               <div class="tut-step">
                 <div class="step-number">3</div>
                 <div class="step-icon">🎯</div>
-                <div class="step-content">
+                <div class="step-content-inner">
                   <strong>Save enough to get your prize!</strong>
                   <span>Reach your goal and WIN!</span>
                 </div>
@@ -353,9 +351,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useGameStore } from '@/stores/gameState'
-import { useRoute } from 'vue-router'
 
 // Import images
 import toyImage from '@/assets/images/kids/dollToy.png'
@@ -366,8 +363,8 @@ import ticketsImage from '@/assets/images/teens/tickets.png'
 import game2Image from '@/assets/images/teens/gameController.png'
 
 const router = useRouter()
-const store = useGameStore()
 const route = useRoute()
+const store = useGameStore()
 
 const currentStep = ref('age')
 const selectedAge = ref(null)
@@ -386,8 +383,16 @@ const funFacts = [
 const currentFactIndex = ref(0)
 const currentFact = computed(() => funFacts[currentFactIndex.value])
 
-// Rotate facts
+// Rotate facts and check for level up redirect
 onMounted(() => {
+  // Check if we were sent here from a Level Up
+  if (route.query.step === 'goal') {
+    currentStep.value = 'goal'
+    selectedAge.value = store.ageGroup
+    selectedCharacter.value = store.selectedCharacter
+  }
+  
+  // Rotate facts
   setInterval(() => {
     currentFactIndex.value = (currentFactIndex.value + 1) % funFacts.length
   }, 5000)
@@ -397,34 +402,6 @@ const ageGroups = [
   { id: 'kids', range: '7-12', emoji: '🧒', label: 'Kids' },
   { id: 'teens', range: '13-17', emoji: '🧑', label: 'Teens' },
 ]
-
-onMounted(() => {
-  // Check if we were sent here from a Level Up
-  if (route.query.step === 'goal') {
-    currentStep.value = 'goal';
-    
-    // Auto-select the age and character based on what they already picked
-    selectedAge.value = store.ageGroup;
-    selectedCharacter.value = store.selectedCharacter;
-  }
-  
-  // Your existing fact interval logic...
-  setInterval(() => {
-    currentFactIndex.value = (currentFactIndex.value + 1) % funFacts.length
-  }, 5000)
-})
-
-// Optional: Filter goals so they see more expensive stuff in Level 2
-const goals = computed(() => {
-  const allPossibleGoals = selectedAge.value === 'kids' ? kidsGoals : teenGoals;
-  
-  if (store.level >= 2) {
-    // Show items that cost more than $30 for Level 2
-    return allPossibleGoals.filter(g => g.cost > 30);
-  }
-  return allPossibleGoals;
-})
-
 
 const kidsCharacters = [
   { 
@@ -467,13 +444,24 @@ const teenCharacters = [
 ]
 
 const teenGoals = [
-  { name: 'AirPods', cost: 200, image: podsImage, color: '#FF6B9D' }, // Using same image for now
+  { name: 'AirPods', cost: 200, image: podsImage, color: '#FF6B9D' },
   { name: 'Gaming Setup', cost: 300, image: game2Image, color: '#4ECDC4' },
   { name: 'Concert Tickets', cost: 150, image: ticketsImage, color: '#6C63FF' }
 ]
 
+// Characters based on age
 const characters = computed(() => selectedAge.value === 'kids' ? kidsCharacters : teenCharacters)
-const goals = computed(() => selectedAge.value === 'kids' ? kidsGoals : teenGoals)
+
+// Goals based on age and level
+const goals = computed(() => {
+  const allPossibleGoals = selectedAge.value === 'kids' ? kidsGoals : teenGoals
+  
+  // Show more expensive items for Level 2+
+  if (store.level >= 2) {
+    return allPossibleGoals.filter(g => g.cost > 30)
+  }
+  return allPossibleGoals
+})
 
 const calculateWeeks = (cost) => {
   const char = characters.value.find(c => c.id === selectedCharacter.value)
@@ -568,9 +556,9 @@ const launchGame = () => {
   top: 0;
   left: 0;
   right: 0;
-  height: 300px; /* Limit the height so they only float at the top */
+  height: 300px;
   pointer-events: none;
-  z-index: 1; /* Behind the content */
+  z-index: 1;
   overflow: hidden;
 }
 
@@ -663,7 +651,7 @@ const launchGame = () => {
   width: 100%;
   box-shadow: 0 8px 32px rgba(0,0,0,0.1);
   position: relative;
-  z-index: 10; /* Above the floating elements */
+  z-index: 10;
 }
 
 .learn-title {
@@ -713,7 +701,7 @@ const launchGame = () => {
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   border-left: 4px solid #6C63FF;
   position: relative;
-  z-index: 10; /* Above the floating elements */
+  z-index: 10;
 }
 
 .fact-icon {
@@ -1299,17 +1287,17 @@ const launchGame = () => {
   flex-shrink: 0;
 }
 
-.step-content {
+.step-content-inner {
   display: flex;
   flex-direction: column;
 }
 
-.step-content strong {
+.step-content-inner strong {
   font-size: 15px;
   color: #2D3436;
 }
 
-.step-content span {
+.step-content-inner span {
   font-size: 13px;
   color: #888;
 }
@@ -1447,7 +1435,7 @@ const launchGame = () => {
   }
   
   .age-options {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
   

@@ -21,6 +21,11 @@
           <span class="stat-icon">🪙</span>
           <span class="stat-text">${{ gameState.balance }}</span>
         </div>
+        <!-- Credit Card Debt Indicator -->
+        <div class="header-stat" :class="{ 'warning': gameState.creditCardDebt > 0 }" v-if="gameState.creditCardDebt > 0">
+          <span class="stat-icon">💳</span>
+          <span class="stat-text">Debt: ${{ gameState.creditCardDebt }}</span>
+        </div>
         <div class="header-stat">
           <span class="stat-icon">🎯</span>
           <span class="stat-text">{{ progressPercent }}% to goal</span>
@@ -87,14 +92,14 @@
       <main class="main-content">
         <!-- Game Card (when scenario is active) -->
         <GameCard 
-          v-if="currentScenario && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp"
+          v-if="currentScenario && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp && !gameState.showCreditCardStatement"
           :scenario="currentScenario"
           @choice="handleChoice"
           @next="handleNext"
         />
         
         <!-- Three Financial Sections -->
-        <div class="financial-sections" v-if="!gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp">
+        <div class="financial-sections" v-if="!gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp && !gameState.showCreditCardStatement">
           
           <!-- Credit Section -->
           <div class="financial-card credit-card">
@@ -111,19 +116,26 @@
               </div>
               <div class="metric">
                 <span class="metric-label">Credit Score</span>
-                <span class="metric-value" :class="{ 
-                  'excellent': gameState.creditScore >= 750,
-                  'good': gameState.creditScore >= 650 && gameState.creditScore < 750,
-                  'fair': gameState.creditScore >= 550 && gameState.creditScore < 650,
-                  'poor': gameState.creditScore < 550
-                }">
+                <span class="metric-value" :class="creditScoreClass">
                   {{ gameState.creditScore }}
                 </span>
               </div>
               <div class="metric" v-if="gameState.creditCardDebt > 0">
                 <span class="metric-label">Min Payment</span>
-                <span class="metric-value">${{ gameState.creditCardMinPayment }}</span>
+                <span class="metric-value">${{ minimumPayment }}</span>
               </div>
+              <div class="metric" v-if="gameState.creditCardDebt > 0">
+                <span class="metric-label">Next Statement</span>
+                <span class="metric-value">Week {{ nextStatementWeek }}</span>
+              </div>
+              <!-- Manual Pay Button -->
+              <button 
+                v-if="gameState.creditCardDebt > 0"
+                class="pay-credit-btn"
+                @click="openCreditCardStatement"
+              >
+                💳 Pay Credit Card
+              </button>
             </div>
           </div>
           
@@ -189,7 +201,7 @@
         </div>
         
         <!-- Empty state -->
-        <div v-else-if="!gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp" class="loading-state">
+        <div v-else-if="!gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp && !gameState.showCreditCardStatement" class="loading-state">
           <span class="loading-emoji">🎮</span>
           <p>Loading next scenario...</p>
         </div>
@@ -228,6 +240,28 @@
           </div>
         </div>
         
+        <!-- Credit Card Summary (if has debt) -->
+        <div class="sidebar-card credit-summary-card" v-if="gameState.creditCardDebt > 0">
+          <h3 class="sidebar-title">💳 Credit Card</h3>
+          <div class="credit-summary">
+            <div class="credit-stat">
+              <span class="credit-label">Balance Due</span>
+              <span class="credit-value debt">${{ gameState.creditCardDebt }}</span>
+            </div>
+            <div class="credit-stat">
+              <span class="credit-label">Interest Rate</span>
+              <span class="credit-value">{{ interestRatePercent }}% APR</span>
+            </div>
+            <div class="credit-stat">
+              <span class="credit-label">Credit Score</span>
+              <span class="credit-value" :class="creditScoreClass">{{ gameState.creditScore }}</span>
+            </div>
+            <div class="credit-warning" v-if="gameState.creditCardDebt > 50">
+              ⚠️ High debt! Pay it down to avoid interest.
+            </div>
+          </div>
+        </div>
+        
         <div class="sidebar-card">
           <h3 class="sidebar-title">💬 Penny Says</h3>
           <div class="penny-tip">
@@ -242,6 +276,14 @@
     <!-- ============================================ -->
     <!-- ALL POPUPS GO HERE -->
     <!-- ============================================ -->
+    
+    <!-- Credit Card Statement Popup -->
+    <CreditCardStatementPopup
+      :show="gameState.showCreditCardStatement"
+      @close="handleCreditCardStatementClose"
+      @paid="handleCreditCardPaid"
+      @skipped="handleCreditCardSkipped"
+    />
     
     <!-- Challenge Popup -->
     <ChallengePopup
@@ -271,9 +313,7 @@
       @close="showBadge = false"
     />
     
-    <!-- ============================================ -->
-    <!-- PENNY HELP POPUP - NEW! -->
-    <!-- ============================================ -->
+    <!-- Penny Help Popup -->
     <PennyHelp
       :show="showPennyHelp"
       :situation="currentSituation"
@@ -298,7 +338,8 @@ import ChallengePopup from '@/components/ChallengePopup.vue'
 import ShopQuizPopup from '@/components/ShopQuizPopup.vue'
 import LevelUpPopup from '@/components/LevelUpPopup.vue'
 import BadgePopup from '@/components/BadgePopup.vue'
-import PennyHelp from '@/components/PennyHelp.vue'  // <-- NEW IMPORT
+import PennyHelp from '@/components/PennyHelp.vue'
+import CreditCardStatementPopup from '@/components/CreditCardStatementPopup.vue'
 
 // ============================================
 // IMAGE IMPORTS
@@ -318,7 +359,7 @@ const showBadge = ref(false)
 const earnedBadge = ref(null)
 const scenarioIndex = ref(0)
 
-// NEW: Penny Help state
+// Penny Help state
 const showPennyHelp = ref(false)
 const currentSituation = ref('struggling')
 const lastHelpWeek = ref(0)
@@ -335,10 +376,22 @@ const pennyTips = [
   "It's okay to treat yourself sometimes! 😊",
   "Patience is a superpower for saving money! ⏰",
   "Smart shoppers compare prices first! 🛒",
-  "Your future self will thank you for saving! 🌟"
+  "Your future self will thank you for saving! 🌟",
+  "Pay off credit card debt quickly to avoid interest! 💳",
+  "A good credit score opens doors in the future! 🚪",
+  "Emergency funds are for real emergencies only! 🛡️"
 ]
 
 const currentTip = computed(() => {
+  // Show credit-related tips if player has debt
+  if (gameState.creditCardDebt > 50) {
+    const creditTips = [
+      "Your credit card debt is growing - pay it off soon! 💳",
+      "Interest makes debt grow faster than you think! 📈",
+      "Try to pay more than the minimum payment! 💪"
+    ]
+    return creditTips[gameState.week % creditTips.length]
+  }
   return pennyTips[gameState.week % pennyTips.length]
 })
 
@@ -376,6 +429,33 @@ const currentScenario = computed(() => {
 })
 
 // ============================================
+// CREDIT CARD COMPUTED PROPERTIES
+// ============================================
+
+const creditScoreClass = computed(() => {
+  const score = gameState.creditScore
+  if (score >= 750) return 'excellent'
+  if (score >= 650) return 'good'
+  if (score >= 550) return 'fair'
+  return 'poor'
+})
+
+const minimumPayment = computed(() => {
+  const debt = gameState.creditCardDebt || 0
+  return Math.min(debt, Math.max(10, Math.round(debt * 0.1)))
+})
+
+const interestRatePercent = computed(() => {
+  return Math.round((gameState.creditCardInterestRate || 0.18) * 100)
+})
+
+const nextStatementWeek = computed(() => {
+  const currentWeek = gameState.week || 1
+  const nextStatement = Math.ceil(currentWeek / 4) * 4
+  return nextStatement === currentWeek ? currentWeek + 4 : nextStatement
+})
+
+// ============================================
 // HELPER FUNCTIONS
 // ============================================
 
@@ -384,11 +464,11 @@ const getSkillName = (key) => skillDefinitions[key]?.name || key
 const getSkillColor = (key) => skillDefinitions[key]?.color || '#6C63FF'
 
 // ============================================
-// NEW: PENNY HELP DETECTION FUNCTIONS
+// PENNY HELP DETECTION FUNCTIONS
 // ============================================
 
 const detectSituation = () => {
-  const { balance, goal, health, totalSaved, totalSpent, savingChoices, spendingChoices, week } = gameState
+  const { balance, goal, health, totalSaved, totalSpent, savingChoices, spendingChoices, week, creditCardDebt } = gameState
   
   // Priority order - check most serious situations first
   
@@ -397,22 +477,27 @@ const detectSituation = () => {
     return { situation: 'debt', shouldShow: true }
   }
   
-  // 2. Very low balance
+  // 2. High credit card debt
+  if (creditCardDebt > 100) {
+    return { situation: 'high_credit_debt', shouldShow: true }
+  }
+  
+  // 3. Very low balance
   if (balance > 0 && balance < gameState.weeklyIncome * 0.3 && week > 2) {
     return { situation: 'low_balance', shouldShow: true }
   }
   
-  // 3. Low happiness
+  // 4. Low happiness
   if (health < 25) {
     return { situation: 'low_happiness', shouldShow: true }
   }
   
-  // 4. Spending spree
+  // 5. Spending spree
   if (totalSpent > totalSaved * 3 && spendingChoices > 3) {
     return { situation: 'spending_spree', shouldShow: true }
   }
   
-  // 5. Generally struggling
+  // 6. Generally struggling
   const issues = []
   if (balance < goal * 0.1 && week > 3) issues.push('low_progress')
   if (spendingChoices > savingChoices && week > 2) issues.push('more_spending')
@@ -422,7 +507,7 @@ const detectSituation = () => {
     return { situation: 'struggling', shouldShow: true }
   }
   
-  // 6. Doing great! (occasional positive reinforcement)
+  // 7. Doing great! (occasional positive reinforcement)
   if (balance >= goal * 0.5 && health >= 60 && savingChoices >= spendingChoices) {
     return { situation: 'great_job', shouldShow: Math.random() < 0.2 }
   }
@@ -440,6 +525,9 @@ const shouldCheckForHelp = () => {
   // Always check when health is critical
   if (gameState.health < 20) return true
   
+  // Always check when credit card debt is high
+  if (gameState.creditCardDebt > 100) return true
+  
   // Check every 3 weeks normally
   if (gameState.week % 3 === 0) return true
   
@@ -448,7 +536,7 @@ const shouldCheckForHelp = () => {
 
 const checkForPennyHelp = () => {
   // Don't interrupt other popups
-  if (gameState.showChallenge || gameState.showShopQuiz || gameState.showLevelUp || showBadge.value) {
+  if (gameState.showChallenge || gameState.showShopQuiz || gameState.showLevelUp || showBadge.value || gameState.showCreditCardStatement) {
     return
   }
   
@@ -461,6 +549,49 @@ const checkForPennyHelp = () => {
     showPennyHelp.value = true
     lastHelpWeek.value = gameState.week
   }
+}
+
+// ============================================
+// CREDIT CARD STATEMENT HANDLERS
+// ============================================
+
+const openCreditCardStatement = () => {
+  // Manually open the credit card statement
+  gameState.showCreditCardStatement = true
+}
+
+const handleCreditCardStatementClose = () => {
+  gameState.dismissCreditCardStatement()
+}
+
+const handleCreditCardPaid = (result) => {
+  console.log('💳 Credit card payment made:', result)
+  
+  // Show feedback based on payment type
+  if (result.type === 'full') {
+    console.log('🎉 Paid in full! No interest charges.')
+  } else if (result.type === 'partial') {
+    console.log(`💰 Paid $${result.amount}. Remaining: $${result.remaining}`)
+  }
+  
+  gameState.dismissCreditCardStatement()
+  
+  // Check for any badges related to credit management
+  checkForBadges()
+  
+  // Continue game
+  advanceGame()
+}
+
+const handleCreditCardSkipped = (result) => {
+  console.log('⚠️ Credit card payment skipped:', result)
+  console.log(`New debt: $${result.newDebt} (Interest added: $${result.interestAdded})`)
+  console.log(`Credit score dropped to: ${result.newScore}`)
+  
+  gameState.dismissCreditCardStatement()
+  
+  // Continue game
+  advanceGame()
 }
 
 // ============================================
@@ -485,6 +616,10 @@ const handleChoice = (choice) => {
     if (choice.effects.health) {
       gameState.health += choice.effects.health
       gameState.health = Math.max(0, Math.min(100, gameState.health))
+    }
+    // Handle credit card usage from choices
+    if (choice.effects.creditCardDebt) {
+      gameState.creditCardDebt += choice.effects.creditCardDebt
     }
   }
 }
@@ -529,25 +664,32 @@ const handleNext = () => {
   // Advance week
   gameState.week++
   
-  // Check for level up first
+  // ============================================
+  // CHECK ORDER MATTERS! 
+  // ============================================
+  
+  // 1. Check for level up first
   const leveledUp = gameState.checkLevelUp()
   if (leveledUp) return
   
-  // Check for shop quiz (every 4 weeks)
-  if (gameState.maybeShowShopQuiz()) return
+  // 2. CHECK FOR CREDIT CARD STATEMENT (every 4 weeks if has debt)
+  if (gameState.maybeShowCreditCardStatement && gameState.maybeShowCreditCardStatement()) {
+    return // Stop here, credit card popup will show
+  }
   
-  // Check for challenge (every 3 weeks)
-  if (gameState.maybeShowChallenge()) return
+  // 3. Check for shop quiz (every 4 weeks)
+  if (gameState.maybeShowShopQuiz && gameState.maybeShowShopQuiz()) return
   
-  // Check for badges
+  // 4. Check for challenge (every 3 weeks)
+  if (gameState.maybeShowChallenge && gameState.maybeShowChallenge()) return
+  
+  // 5. Check for badges
   checkForBadges()
   
-  // ============================================
-  // NEW: Check if Penny should help
-  // ============================================
+  // 6. Check if Penny should help
   checkForPennyHelp()
   
-  // Advance game
+  // 7. Advance game
   advanceGame()
 }
 
@@ -573,7 +715,7 @@ const handleShopQuizComplete = (wasCorrect, savedAmount) => {
 }
 
 // ============================================
-// NEW: Penny Help Handlers
+// Penny Help Handlers
 // ============================================
 
 const handlePennyHelpClose = () => {
@@ -604,8 +746,8 @@ const advanceGame = () => {
     return
   }
   
-  // Check for too much debt
-  if (gameState.balance < -50) {
+  // Check for too much debt (increased threshold since we have credit cards now)
+  if (gameState.balance < -100) {
     router.push('/results')
     return
   }
@@ -977,6 +1119,69 @@ const advanceGame = () => {
   color: #FF6B9D;
 }
 
+/* Credit Summary Card */
+.credit-summary-card {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #F0F0FF 0%, white 100%);
+}
+
+.credit-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.credit-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 10px;
+}
+
+.credit-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.credit-value {
+  font-size: 14px;
+  font-weight: 800;
+  color: #2D3436;
+}
+
+.credit-value.debt {
+  color: #FF6B6B;
+}
+
+.credit-value.excellent {
+  color: #4ECDC4;
+}
+
+.credit-value.good {
+  color: #667eea;
+}
+
+.credit-value.fair {
+  color: #FFB347;
+}
+
+.credit-value.poor {
+  color: #FF6B6B;
+}
+
+.credit-warning {
+  padding: 10px;
+  background: #FFF3E0;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #FF6B6B;
+  text-align: center;
+  font-weight: 600;
+}
+
 /* Penny Tip */
 .penny-tip {
   display: flex;
@@ -1088,7 +1293,7 @@ const advanceGame = () => {
 }
 
 .metric-value.good {
-  color: #FFD93D;
+  color: #667eea;
 }
 
 .metric-value.fair {
@@ -1153,6 +1358,27 @@ const advanceGame = () => {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* Pay Credit Card Button */
+.pay-credit-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.pay-credit-btn:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 /* Card specific colors */

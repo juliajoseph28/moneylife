@@ -159,6 +159,14 @@
     <!-- ALL POPUPS GO HERE -->
     <!-- ============================================ -->
     
+    <!-- Credit Card Statement Popup -->
+    <CreditCardStatementPopup
+      :show="gameState.showCreditCardStatement"
+      @close="handleCreditCardStatementClose"
+      @paid="handleCreditCardPaid"
+      @skipped="handleCreditCardSkipped"
+    />
+    
     <!-- Challenge Popup -->
     <ChallengePopup
       :show="gameState.showChallenge"
@@ -223,6 +231,7 @@ import LevelUpPopup from '@/components/LevelUpPopup.vue'
 import BadgePopup from '@/components/BadgePopup.vue'
 import PennyHelp from '@/components/PennyHelp.vue'
 import GeminiChatbox from '@/components/GeminiChatbox.vue'
+import CreditCardStatementPopup from '@/components/CreditCardStatementPopup.vue'
 
 // ============================================
 // IMAGE IMPORTS
@@ -360,6 +369,34 @@ const checkForPennyHelp = () => {
 }
 
 // ============================================
+// CREDIT CARD STATEMENT HANDLERS
+// ============================================
+const handleCreditCardStatementClose = () => {
+  gameState.dismissCreditCardStatement()
+}
+
+const handleCreditCardPaid = (result) => {
+  console.log('💳 Credit card payment made:', result)
+  
+  if (result.type === 'full') {
+    console.log('🎉 Paid in full! No interest charges.')
+  } else if (result.type === 'partial') {
+    console.log(`💰 Paid $${result.amount}. Remaining: $${result.remaining}`)
+  }
+  
+  gameState.dismissCreditCardStatement()
+  checkForBadges()
+}
+
+const handleCreditCardSkipped = (result) => {
+  console.log('⚠️ Credit card payment skipped:', result)
+  console.log(`New debt: $${result.newDebt} (Interest added: $${result.interestAdded})`)
+  console.log(`Credit score dropped to: ${result.newScore}`)
+  
+  gameState.dismissCreditCardStatement()
+}
+
+// ============================================
 // EVENT HANDLERS
 // ============================================
 const handleChoice = (choice) => {
@@ -384,33 +421,55 @@ const handleChoice = (choice) => {
 }
 
 const handleNext = () => {
-  // 1. First, check if they hit the goal and need to Level Up
-  const leveledUp = gameState.checkLevelUp();
-  
-  if (leveledUp) {
-    // Stop here! The LevelUpPopup is now showing.
-    // When they click "Awesome", they will start Level 2 at Week 1.
-    return;
+  // Add biweekly income
+  if (gameState.week % 2 === 0) {
+    gameState.balance += gameState.weeklyIncome
+    
+    // Grow investments if any
+    if (gameState.investmentPortfolio > 0) {
+      const growth = Math.round(gameState.investmentPortfolio * 0.02)
+      gameState.investmentPortfolio += growth
+      gameState.investmentReturns += growth
+    }
   }
-
-  // 2. If they didn't level up, just proceed to the next week normally
-  gameState.balance += gameState.weeklyIncome;
-  gameState.week++;
   
-  // Normal game progression...
-  advanceGame();
+  gameState.addSkill('responsibility', 1)
+  gameState.week++
+  
+  // 1. Check for level up first
+  if (gameState.checkLevelUp && gameState.checkLevelUp()) {
+    return
+  }
+  
+  // 2. Check for credit card statement
+  if (gameState.maybeShowCreditCardStatement && gameState.maybeShowCreditCardStatement()) {
+    return
+  }
+  
+  // 3. Check for shop quiz
+  if (gameState.maybeShowShopQuiz && gameState.maybeShowShopQuiz()) {
+    return
+  }
+  
+  // 4. Check for random challenge
+  if (gameState.maybeShowChallenge && gameState.maybeShowChallenge()) {
+    return
+  }
+  
+  // 5. Check for badges
+  checkForBadges()
+  
+  // 6. Check if Penny should help
+  checkForPennyHelp()
+  
+  // 7. Continue game
+  advanceGame()
 }
 
-import { useRouter } from 'vue-router'
-const router = useRouter()
-
 const handleLevelUpClose = () => {
-  gameState.dismissLevelUp();
-  
-  // Send them back to the Home page, but add a "query" 
-  // so we know to skip straight to the goal selection
-  router.push({ path: '/', query: { step: 'goal' } });
-};
+  gameState.dismissLevelUp()
+  router.push({ path: '/', query: { step: 'goal' } })
+}
 
 const handleChallengeComplete = (wasCorrect) => {
   gameState.completeChallenge(wasCorrect)

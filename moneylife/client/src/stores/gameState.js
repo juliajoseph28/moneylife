@@ -216,6 +216,8 @@ export const gameState = reactive({
   currentConsequence: null,
   showPennyHelp: false,
   pennySituation: null,
+  showCreditCardStatement: false,
+  lastCreditCardStatementWeek: 0,
   
   // ============================================
   // CHARACTER & GOAL
@@ -336,7 +338,28 @@ export const gameState = reactive({
     
     return { success: true }
   },
-  
+  // Add these methods to gameState
+
+maybeShowCreditCardStatement() {
+  // Show every 4 weeks if there's debt
+  if (this.creditCardDebt > 0 && 
+      this.week > 0 && 
+      this.week % 4 === 0 && 
+      this.week !== this.lastCreditCardStatementWeek) {
+    
+    // Apply interest before showing statement
+    this.applyCreditCardInterest()
+    
+    this.showCreditCardStatement = true
+    this.lastCreditCardStatementWeek = this.week
+    return true
+  }
+  return false
+},
+
+dismissCreditCardStatement() {
+  this.showCreditCardStatement = false
+},
   updateHappinessTracking() {
     if (this.health > this.peakHappiness) {
       this.peakHappiness = this.health
@@ -701,16 +724,18 @@ checkLevelUp() {
   },
   
   applyCreditCardInterest() {
-    if (this.creditCardDebt > 0) {
-      const monthlyRate = this.creditCardInterestRate / 12
-      const weeklyRate = monthlyRate / 4
-      const interest = Math.round(this.creditCardDebt * weeklyRate * 100) / 100
-      this.creditCardDebt += interest
-      this.creditCardDebt = Math.round(this.creditCardDebt * 100) / 100
-      return interest
-    }
-    return 0
-  },
+  if (this.creditCardDebt > 0) {
+    const monthlyRate = (this.creditCardInterestRate || 0.18) / 12
+    const interest = Math.round(this.creditCardDebt * monthlyRate * 100) / 100
+    this.creditCardDebt += interest
+    
+    // Track interest charged
+    if (!this.totalInterestPaid) this.totalInterestPaid = 0
+    this.totalInterestPaid += interest
+    
+    console.log(`Interest charged: $${interest}. New debt: $${this.creditCardDebt}`)
+  }
+},
   
   makeCreditCardPayment(amount) {
     const payment = Math.min(amount, this.creditCardDebt)
