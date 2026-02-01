@@ -155,18 +155,16 @@
       
     </div>
     
-    <!-- ============================================ -->
-    <!-- ALL POPUPS GO HERE -->
-    <!-- ============================================ -->
-    <!-- Add this with your other popups in the template -->
-
-    <!-- Credit Card Statement Popup (every 4 weeks when there's debt) -->
+    <!-- ALL POPUPS -->
+    
+    <!-- Credit Card Statement Popup -->
     <CreditCardStatementPopup
-    :show="gameState.showCreditCardStatement"
-    @close="handleCreditCardStatementClose"
-    @paid="handleCreditCardPaid"
-    @skipped="handleCreditCardSkipped"
+      :show="gameState.showCreditCardStatement"
+      @close="handleCreditCardStatementClose"
+      @paid="handleCreditCardPaid"
+      @skipped="handleCreditCardSkipped"
     />
+    
     <!-- Challenge Popup -->
     <ChallengePopup
       :show="gameState.showChallenge"
@@ -214,16 +212,12 @@
 </template>
 
 <script setup>
-// Add this import with your other component imports
-import CreditCardStatementPopup from '@/components/CreditCardStatementPopup.vue'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { gameState, levels, skillDefinitions } from '@/stores/gameState'
 import { scenarios } from '@/data/scenarios'
 
-// ============================================
-// COMPONENT IMPORTS
-// ============================================
+// Component Imports
 import GameCard from '@/components/GameCard.vue'
 import ValuePickerCard from '@/components/ValuePickerCard.vue'
 import DealDetectorCard from '@/components/DealDetectorCard.vue'
@@ -233,53 +227,16 @@ import LevelUpPopup from '@/components/LevelUpPopup.vue'
 import BadgePopup from '@/components/BadgePopup.vue'
 import PennyHelp from '@/components/PennyHelp.vue'
 import GeminiChatbox from '@/components/GeminiChatbox.vue'
-// ============================================
-// CREDIT CARD STATEMENT HANDLERS
-// ============================================
+import CreditCardStatementPopup from '@/components/CreditCardStatementPopup.vue'
 
-const handleCreditCardStatementClose = () => {
-  gameState.dismissCreditCardStatement()
-}
-
-const handleCreditCardPaid = (result) => {
-  console.log('💳 Credit card payment made:', result)
-  
-  // Show feedback based on payment type
-  if (result.type === 'full') {
-    // Could show a success toast/notification
-    console.log('🎉 Paid in full! No interest charges.')
-  } else if (result.type === 'partial') {
-    console.log(`💰 Paid $${result.amount}. Remaining: $${result.remaining}`)
-  }
-  
-  gameState.dismissCreditCardStatement()
-  
-  // Check for any badges related to credit management
-  checkForBadges()
-}
-
-const handleCreditCardSkipped = (result) => {
-  console.log('⚠️ Credit card payment skipped:', result)
-  console.log(`New debt: $${result.newDebt} (Interest added: $${result.interestAdded})`)
-  console.log(`Credit score dropped to: ${result.newScore}`)
-  
-  gameState.dismissCreditCardStatement()
-  
-  // Maybe show a warning notification here
-  // showNotification('Payment Missed!', 'Your debt grew and credit score dropped.', 'warning')
-}
-// ============================================
-// IMAGE IMPORTS
-// ============================================
+// Image Imports
 import toyImage from '@/assets/images/kids/dollToy.png'
 import artImage from '@/assets/images/kids/crayonBox.png'
 import gameImage from '@/assets/images/kids/gameController.png'
 
 const router = useRouter()
 
-// ============================================
-// STATE / REFS
-// ============================================
+// State
 const showBadge = ref(false)
 const earnedBadge = ref(null)
 const scenarioIndex = ref(0)
@@ -289,9 +246,7 @@ const showPennyHelp = ref(false)
 const currentSituation = ref('struggling')
 const lastHelpWeek = ref(0)
 
-// ============================================
-// COMPUTED PROPERTIES
-// ============================================
+// Penny Tips
 const pennyTips = [
   "Save a little each week and watch it grow! 🌱",
   "Think before you spend - do you really need it? 🤔",
@@ -334,17 +289,12 @@ const currentScenario = computed(() => {
   return scenarios[scenarioIndex.value % scenarios.length]
 })
 
-// =======================================================
-// ==========
-// HELPER FUNCTIONS
-// ============================================
+// Helper Functions
 const getSkillIcon = (key) => skillDefinitions[key]?.icon || '⭐'
 const getSkillName = (key) => skillDefinitions[key]?.name || key
 const getSkillColor = (key) => skillDefinitions[key]?.color || '#6C63FF'
 
-// ============================================
-// PENNY HELP DETECTION
-// ============================================
+// Penny Help Detection
 const detectSituation = () => {
   const { balance, goal, health, totalSaved, totalSpent, savingChoices, spendingChoices, week } = gameState
   
@@ -404,9 +354,39 @@ const checkForPennyHelp = () => {
   }
 }
 
-// ============================================
-// EVENT HANDLERS
-// ============================================
+// Credit Card Statement Handlers
+const handleCreditCardStatementClose = () => {
+  if (gameState.dismissCreditCardStatement) {
+    gameState.dismissCreditCardStatement()
+  }
+}
+
+const handleCreditCardPaid = (result) => {
+  console.log('💳 Credit card payment made:', result)
+  
+  if (result.type === 'full') {
+    console.log('🎉 Paid in full! No interest charges.')
+  } else if (result.type === 'partial') {
+    console.log(`💰 Paid $${result.amount}. Remaining: $${result.remaining}`)
+  }
+  
+  if (gameState.dismissCreditCardStatement) {
+    gameState.dismissCreditCardStatement()
+  }
+  checkForBadges()
+}
+
+const handleCreditCardSkipped = (result) => {
+  console.log('⚠️ Credit card payment skipped:', result)
+  console.log(`New debt: $${result.newDebt} (Interest added: $${result.interestAdded})`)
+  console.log(`Credit score dropped to: ${result.newScore}`)
+  
+  if (gameState.dismissCreditCardStatement) {
+    gameState.dismissCreditCardStatement()
+  }
+}
+
+// Event Handlers
 const handleChoice = (choice) => {
   if (choice.effects) {
     if (choice.effects.balance) {
@@ -435,7 +415,7 @@ const handleNext = () => {
     
     // Grow investments if any
     if (gameState.investmentPortfolio > 0) {
-      const growth = Math.round(gameState.investmentPortfolio * 0.02) // 2% growth
+      const growth = Math.round(gameState.investmentPortfolio * 0.02)
       gameState.investmentPortfolio += growth
       gameState.investmentReturns += growth
     }
@@ -444,48 +424,39 @@ const handleNext = () => {
   gameState.addSkill('responsibility', 1)
   gameState.week++
   
-  // Check for level up first
+  // 1. Check for level up first
   if (gameState.checkLevelUp && gameState.checkLevelUp()) {
-    return // Stop here, level up popup will show
+    return
   }
   
-  // =============================================
-  // CHECK FOR CREDIT CARD STATEMENT (ADD THIS!)
-  // =============================================
-  if (gameState.maybeShowCreditCardStatement()) {
-    return // Stop here, credit card popup will show
+  // 2. Check for credit card statement
+  if (gameState.maybeShowCreditCardStatement && gameState.maybeShowCreditCardStatement()) {
+    return
   }
   
-  // Check for shop quiz
+  // 3. Check for shop quiz
   if (gameState.maybeShowShopQuiz && gameState.maybeShowShopQuiz()) {
     return
   }
   
-  // Check for random challenge
+  // 4. Check for random challenge
   if (gameState.maybeShowChallenge && gameState.maybeShowChallenge()) {
     return
   }
   
-  // Check for badges
-  if (typeof checkForBadges === 'function') {
-    checkForBadges()
-  }
+  // 5. Check for badges
+  checkForBadges()
   
-  // Check if Penny should help
-  if (typeof checkForPennyHelp === 'function') {
-    checkForPennyHelp()
-  }
+  // 6. Check if Penny should help
+  checkForPennyHelp()
   
-  // Continue game
-  if (typeof advanceGame === 'function') {
-    advanceGame()
-  }
+  // 7. Continue game
+  advanceGame()
 }
 
 const handleLevelUpClose = () => {
   gameState.dismissLevelUp()
-  checkForBadges()
-  advanceGame()
+  router.push({ path: '/', query: { step: 'goal' } })
 }
 
 const handleChallengeComplete = (wasCorrect) => {
@@ -508,25 +479,17 @@ const handlePennyHelped = () => {
   gameState.addSkill('planning', 2)
 }
 
-// ============================================
-// VALUE PICKER HANDLER
-// ============================================
 const handleValuePickerComplete = (result) => {
   checkForBadges()
   advanceGame()
 }
 
-// ============================================
-// DEAL DETECTOR HANDLER
-// ============================================
 const handleDealDetectorComplete = (result) => {
   checkForBadges()
   advanceGame()
 }
 
-// ============================================
-// BADGE & GAME PROGRESSION
-// ============================================
+// Badge & Game Progression
 const checkForBadges = () => {
   const newBadges = gameState.checkBadges()
   if (newBadges.length > 0) {
@@ -561,9 +524,6 @@ const advanceGame = () => {
 </script>
 
 <style scoped>
-/* =====================
-   BASE LAYOUT
-   ===================== */
 .game-view {
   min-height: 100vh;
   background: linear-gradient(135deg, #87CEEB 0%, #E0F4FF 40%, #98D8AA 100%);
@@ -571,9 +531,6 @@ const advanceGame = () => {
   flex-direction: column;
 }
 
-/* =====================
-   HEADER
-   ===================== */
 .game-header {
   display: flex;
   justify-content: space-between;
@@ -652,19 +609,9 @@ const advanceGame = () => {
   50% { transform: scale(1.05); }
 }
 
-.stat-icon {
-  font-size: 20px;
-}
+.stat-icon { font-size: 20px; }
+.stat-text { font-size: 15px; font-weight: 700; color: #2D3436; }
 
-.stat-text {
-  font-size: 15px;
-  font-weight: 700;
-  color: #2D3436;
-}
-
-/* =====================
-   MAIN LAYOUT
-   ===================== */
 .game-layout {
   flex: 1;
   display: grid;
@@ -676,9 +623,6 @@ const advanceGame = () => {
   width: 100%;
 }
 
-/* =====================
-   SIDEBARS
-   ===================== */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -701,291 +645,63 @@ const advanceGame = () => {
   font-family: 'Comic Sans MS', cursive;
 }
 
-/* Money Display */
-.money-display {
-  text-align: center;
-  margin-bottom: 16px;
-}
+.money-display { text-align: center; margin-bottom: 16px; }
+.money-amount { display: block; font-size: 36px; font-weight: 900; color: #4ECDC4; font-family: 'Comic Sans MS', cursive; }
+.money-amount.negative { color: #FF6B6B; }
+.money-goal { font-size: 14px; color: #888; }
 
-.money-amount {
-  display: block;
-  font-size: 36px;
-  font-weight: 900;
-  color: #4ECDC4;
-  font-family: 'Comic Sans MS', cursive;
-}
+.progress-container { text-align: center; }
+.progress-bar-large { height: 16px; background: #E8E8E8; border-radius: 10px; overflow: hidden; margin-bottom: 8px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #4ECDC4, #44A08D); border-radius: 10px; transition: width 0.5s ease; }
+.progress-label { font-size: 13px; font-weight: 700; color: #4ECDC4; }
 
-.money-amount.negative {
-  color: #FF6B6B;
-}
+.skills-list { display: flex; flex-direction: column; gap: 12px; }
+.skill-row { display: flex; align-items: center; gap: 10px; }
+.skill-icon { font-size: 18px; width: 24px; text-align: center; }
+.skill-name { font-size: 12px; font-weight: 600; color: #666; width: 70px; }
+.skill-bar-mini { flex: 1; height: 8px; background: #E8E8E8; border-radius: 4px; overflow: hidden; }
+.skill-fill-mini { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.skill-value { font-size: 12px; font-weight: 800; color: #2D3436; width: 24px; text-align: right; }
 
-.money-goal {
-  font-size: 14px;
-  color: #888;
-}
+.badges-mini { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge-mini { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: #F8F8F8; border-radius: 10px; transition: transform 0.2s ease; }
+.badge-mini.unlocked { background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%); }
+.badge-mini.unlocked:hover { transform: scale(1.15); }
 
-.progress-container {
-  text-align: center;
-}
+.goal-card { border-color: #FFE66D; background: linear-gradient(135deg, #FFFDF0 0%, white 100%); }
+.goal-display { text-align: center; padding: 16px 0; }
+.goal-image { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; }
+.goal-name { display: block; font-size: 18px; font-weight: 800; color: #2D3436; margin-bottom: 4px; }
+.goal-cost { font-size: 24px; font-weight: 900; color: #FF6B9D; }
+.goal-countdown { text-align: center; padding: 12px; background: #FFF8F0; border-radius: 12px; font-size: 14px; font-weight: 700; color: #888; }
+.goal-ready { color: #4ECDC4; }
 
-.progress-bar-large {
-  height: 16px;
-  background: #E8E8E8;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
+.weekly-stats { display: flex; flex-direction: column; gap: 12px; }
+.weekly-stat { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #FFF8F0; border-radius: 12px; }
+.weekly-label { font-size: 13px; font-weight: 600; color: #666; }
+.weekly-value { font-size: 16px; font-weight: 800; color: #2D3436; }
+.weekly-value.positive { color: #4ECDC4; }
+.weekly-value.negative { color: #FF6B9D; }
 
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #4ECDC4, #44A08D);
-  border-radius: 10px;
-  transition: width 0.5s ease;
-}
+.penny-tip { display: flex; align-items: flex-start; gap: 12px; }
+.penny-mini { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+.tip-text { margin: 0; font-size: 13px; color: #666; line-height: 1.5; font-style: italic; }
 
-.progress-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #4ECDC4;
-}
+.main-content { display: flex; align-items: flex-start; justify-content: center; }
 
-/* Skills List */
-.skills-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+.loading-state { text-align: center; padding: 60px; background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.loading-emoji { font-size: 64px; display: block; margin-bottom: 16px; animation: pulse 1s ease-in-out infinite; }
+.loading-state p { color: #888; font-size: 16px; }
 
-.skill-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.skill-icon {
-  font-size: 18px;
-  width: 24px;
-  text-align: center;
-}
-
-.skill-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: #666;
-  width: 70px;
-}
-
-.skill-bar-mini {
-  flex: 1;
-  height: 8px;
-  background: #E8E8E8;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.skill-fill-mini {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-.skill-value {
-  font-size: 12px;
-  font-weight: 800;
-  color: #2D3436;
-  width: 24px;
-  text-align: right;
-}
-
-/* Badges Mini */
-.badges-mini {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.badge-mini {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  background: #F8F8F8;
-  border-radius: 10px;
-  transition: transform 0.2s ease;
-}
-
-.badge-mini.unlocked {
-  background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%);
-}
-
-.badge-mini.unlocked:hover {
-  transform: scale(1.15);
-}
-
-/* Goal Card */
-.goal-card {
-  border-color: #FFE66D;
-  background: linear-gradient(135deg, #FFFDF0 0%, white 100%);
-}
-
-.goal-display {
-  text-align: center;
-  padding: 16px 0;
-}
-
-.goal-image {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  margin-bottom: 12px;
-}
-
-.goal-name {
-  display: block;
-  font-size: 18px;
-  font-weight: 800;
-  color: #2D3436;
-  margin-bottom: 4px;
-}
-
-.goal-cost {
-  font-size: 24px;
-  font-weight: 900;
-  color: #FF6B9D;
-}
-
-.goal-countdown {
-  text-align: center;
-  padding: 12px;
-  background: #FFF8F0;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #888;
-}
-
-.goal-ready {
-  color: #4ECDC4;
-}
-
-/* Weekly Stats */
-.weekly-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.weekly-stat {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  background: #FFF8F0;
-  border-radius: 12px;
-}
-
-.weekly-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #666;
-}
-
-.weekly-value {
-  font-size: 16px;
-  font-weight: 800;
-  color: #2D3436;
-}
-
-.weekly-value.positive {
-  color: #4ECDC4;
-}
-
-.weekly-value.negative {
-  color: #FF6B9D;
-}
-
-/* Penny Tip */
-.penny-tip {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.penny-mini {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.tip-text {
-  margin: 0;
-  font-size: 13px;
-  color: #666;
-  line-height: 1.5;
-  font-style: italic;
-}
-
-/* =====================
-   MAIN CONTENT
-   ===================== */
-.main-content {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.loading-state {
-  text-align: center;
-  padding: 60px;
-  background: white;
-  border-radius: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-
-.loading-emoji {
-  font-size: 64px;
-  display: block;
-  margin-bottom: 16px;
-  animation: pulse 1s ease-in-out infinite;
-}
-
-.loading-state p {
-  color: #888;
-  font-size: 16px;
-}
-
-/* =====================
-   RESPONSIVE
-   ===================== */
 @media (max-width: 1200px) {
-  .game-layout {
-    grid-template-columns: 1fr;
-    max-width: 600px;
-  }
-  
-  .sidebar {
-    display: none;
-  }
-  
-  .header-stats {
-    display: none;
-  }
+  .game-layout { grid-template-columns: 1fr; max-width: 600px; }
+  .sidebar { display: none; }
+  .header-stats { display: none; }
 }
 
 @media (max-width: 768px) {
-  .game-header {
-    padding: 12px 16px;
-  }
-  
-  .game-title {
-    font-size: 20px;
-  }
-  
-  .game-layout {
-    padding: 16px;
-  }
+  .game-header { padding: 12px 16px; }
+  .game-title { font-size: 20px; }
+  .game-layout { padding: 16px; }
 }
 </style>

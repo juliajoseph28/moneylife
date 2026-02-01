@@ -23,8 +23,8 @@ export const levels = [
     name: 'Neighborhood Explorer',
     icon: '🏘️',
     description: 'Exploring your neighborhood!',
-    requiredWeeks: 6,
-    requiredSavings: 15,
+    requiredWeeks: 0,
+    requiredSavings: 50,
     unlocks: ['Park', 'Friend\'s House'],
     color: '#667eea'
   },
@@ -33,8 +33,8 @@ export const levels = [
     name: 'Town Adventurer',
     icon: '🏙️',
     description: 'Discovering the town!',
-    requiredWeeks: 12,
-    requiredSavings: 40,
+    requiredWeeks: 0,
+    requiredSavings: 150,
     unlocks: ['Mall', 'Arcade', 'Pet Store'],
     color: '#FF6B9D'
   },
@@ -43,8 +43,8 @@ export const levels = [
     name: 'Money Master',
     icon: '🌟',
     description: 'You\'re a financial superstar!',
-    requiredWeeks: 20,
-    requiredSavings: 100,
+    requiredWeeks: 0,
+    requiredSavings: 200,
     unlocks: ['Bank', 'Investment Club'],
     color: '#FFD93D'
   }
@@ -551,36 +551,25 @@ dismissCreditCardStatement() {
     }
   },
   
-  checkLevelUp() {
-    if (this.balance < 0) {
-      return false
-    }
+checkLevelUp() {
+  if (this.balance >= this.goal) {
+    const nextLevel = levels.find(l => l.id === this.currentLevel + 1);
     
-    for (let i = levels.length - 1; i >= 0; i--) {
-      const level = levels[i]
-      if (this.week >= level.requiredWeeks && 
-          this.balance >= level.requiredSavings &&
-          this.currentLevel < level.id) {
-        
-        this.currentLevel = level.id
-        this.newLevel = level
-        this.showLevelUp = true
-        
-        level.unlocks.forEach(loc => {
-          if (!this.unlockedLocations.includes(loc)) {
-            this.unlockedLocations.push(loc)
-          }
-        })
-        
-        this.balance += 3
-        this.addSkill('planning', 5)
-        
-        return true
-      }
+    if (nextLevel) {
+      // 1. "Buy" the item (Subtract the money)
+      this.balance -= this.goal; 
+
+      // 2. Set Level Up state
+      this.currentLevel = nextLevel.id;
+      this.newLevel = nextLevel;
+      this.showLevelUp = true;
+
+      return true;
     }
-    return false
-  },
-  
+  }
+  return false;
+},
+
   dismissLevelUp() {
     this.showLevelUp = false
     this.newLevel = null
