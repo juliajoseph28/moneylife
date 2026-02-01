@@ -333,9 +333,12 @@ import { useRouter } from 'vue-router'
 import { useGameStore } from '@/stores/gameState'
 
 // Import images
-import toyImage from '@/assets/images/teens/airpods.png'
-import artImage from '@/assets/images/teens/tickets.png'
-import gameImage from '@/assets/images/teens/game.png'
+import toyImage from '@/assets/images/kids/dollToy.png'
+import artImage from '@/assets/images/kids/crayonBox.png'
+import gameImage from '@/assets/images/kids/gameController.png'
+import podsImage from '@/assets/images/teens/airpods.png'
+import ticketsImage from '@/assets/images/teens/tickets.png'
+import game2Image from '@/assets/images/teens/gameController.png'
 
 const router = useRouter()
 const store = useGameStore()
@@ -410,9 +413,9 @@ const teenCharacters = [
 ]
 
 const teenGoals = [
-  { name: 'AirPods', cost: 200, image: toyImage, color: '#FF6B9D' }, // Using same image for now
-  { name: 'Gaming Setup', cost: 300, image: gameImage, color: '#4ECDC4' },
-  { name: 'Concert Tickets', cost: 150, image: artImage, color: '#6C63FF' }
+  { name: 'AirPods', cost: 200, image: podsImage, color: '#FF6B9D' }, // Using same image for now
+  { name: 'Gaming Setup', cost: 300, image: game2Image, color: '#4ECDC4' },
+  { name: 'Concert Tickets', cost: 150, image: ticketsImage, color: '#6C63FF' }
 ]
 
 const characters = computed(() => selectedAge.value === 'kids' ? kidsCharacters : teenCharacters)
