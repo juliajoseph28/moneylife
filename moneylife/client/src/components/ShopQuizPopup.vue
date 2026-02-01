@@ -2,72 +2,78 @@
   <div v-if="show" class="quiz-overlay">
     <div class="quiz-card">
       
-      <!-- Header -->
-      <div class="quiz-header">
-        <div class="header-icon">🛒</div>
-        <h2 class="header-title">{{ quiz?.title || 'Shop Smart!' }}</h2>
-        <p class="header-subtitle">Pick the best deal!</p>
-      </div>
-      
-      <!-- Scenario -->
-      <div class="scenario-box">
-        <p class="scenario-text">{{ quiz?.scenario }}</p>
-      </div>
-      
-      <!-- Options -->
-      <div class="options-container">
-        <button
-          v-for="option in quiz?.options"
-          :key="option.id"
-          class="option-card"
-          :class="{ 
-            selected: selectedOption === option.id,
-            correct: answered && option.isBest,
-            wrong: answered && selectedOption === option.id && !option.isBest,
-            disabled: answered
-          }"
-          :disabled="answered"
-          @click="selectOption(option)"
-        >
-          <div class="option-header">
-            <span class="option-name">{{ option.name }}</span>
-            <span class="option-price">${{ option.price }}</span>
+      <!-- Left Side: Question & Info -->
+      <div class="quiz-left">
+        <!-- Header -->
+        <div class="quiz-header">
+          <div class="header-icon">🛒</div>
+          <h2 class="header-title">{{ quiz?.title || 'Shop Smart!' }}</h2>
+          <p class="header-subtitle">Pick the best deal!</p>
+        </div>
+        
+        <!-- Scenario -->
+        <div class="scenario-box">
+          <p class="scenario-text">{{ quiz?.scenario }}</p>
+        </div>
+        
+        <!-- Penny Helper -->
+        <div v-if="!answered" class="penny-helper">
+          <img src="@/assets/images/kids/pig.png" class="penny-img" alt="Penny" />
+          <div class="penny-speech">
+            <p>Compare the prices and think about what you really need! 🤔</p>
           </div>
-          <p class="option-quality">{{ option.quality }}</p>
+        </div>
+      </div>
+      
+      <!-- Right Side: Options & Results -->
+      <div class="quiz-right">
+        <!-- Options -->
+        <div v-if="!answered" class="options-container">
+          <button
+            v-for="option in quiz?.options"
+            :key="option.id"
+            class="option-card"
+            :class="{ 
+              selected: selectedOption === option.id,
+              correct: answered && option.isBest,
+              wrong: answered && selectedOption === option.id && !option.isBest,
+              disabled: answered
+            }"
+            :disabled="answered"
+            @click="selectOption(option)"
+          >
+            <div class="option-header">
+              <span class="option-name">{{ option.name }}</span>
+              <span class="option-price">${{ option.price }}</span>
+            </div>
+            <p class="option-quality">{{ option.quality }}</p>
+            
+            <div v-if="answered && option.isBest" class="best-badge">
+              ✓ BEST DEAL!
+            </div>
+          </button>
+        </div>
+        
+        <!-- Result -->
+        <div v-if="answered" class="result-container" :class="isCorrect ? 'correct' : 'wrong'">
+          <div class="result-icon">{{ isCorrect ? '🎉' : '🤔' }}</div>
+          <h3 class="result-title">{{ isCorrect ? 'Smart Shopper!' : 'Good Try!' }}</h3>
+          <p class="result-tip">{{ quiz?.tip }}</p>
           
-          <div v-if="answered && option.isBest" class="best-badge">
-            ✓ BEST DEAL!
+          <div v-if="isCorrect" class="savings-box">
+            <span class="savings-icon">💰</span>
+            <span class="savings-text">You saved ${{ quiz?.savings }}!</span>
           </div>
-        </button>
-      </div>
-      
-      <!-- Result -->
-      <div v-if="answered" class="result-container" :class="isCorrect ? 'correct' : 'wrong'">
-        <div class="result-icon">{{ isCorrect ? '🎉' : '🤔' }}</div>
-        <h3 class="result-title">{{ isCorrect ? 'Smart Shopper!' : 'Good Try!' }}</h3>
-        <p class="result-tip">{{ quiz?.tip }}</p>
-        
-        <div v-if="isCorrect" class="savings-box">
-          <span class="savings-icon">💰</span>
-          <span class="savings-text">You saved ${{ quiz?.savings }}!</span>
-        </div>
-        
-        <div class="skills-earned">
-          <span class="skill-badge">📋 +5 Planning</span>
-          <span v-if="isCorrect" class="skill-badge">⏰ +3 Patience</span>
-        </div>
-        
-        <button class="btn-continue" @click="handleComplete">
-          <span>Continue</span>
-          <span class="btn-arrow">→</span>
-        </button>
-      </div>
-      
-      <!-- Penny Helper -->
-      <div v-if="!answered" class="penny-helper">
-        <img src="@/assets/images/kids/pig.png" class="penny-img" alt="Penny" />
-        <div class="penny-speech">
-          <p>Compare the prices and think about what you really need! 🤔</p>
+          
+          <div class="skills-earned">
+            <span class="skill-badge">📋 +5 Planning</span>
+            <span v-if="isCorrect" class="skill-badge">⏰ +3 Patience</span>
+          </div>
+          
+          <button class="btn-continue" @click="handleComplete">
+            <span>Continue</span>
+            <span class="btn-arrow">→</span>
+          </button>
         </div>
       </div>
       
@@ -124,13 +130,15 @@ const handleComplete = () => {
 
 .quiz-card {
   background: white;
-  border-radius: 32px;
-  padding: 0;
-  max-width: 480px;
-  width: 100%;
+  border-radius: 24px;
+  max-width: 900px;
+  width: 95%;
+  max-height: 85vh;
   border: 4px solid #4ECDC4;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: popIn 0.4s ease;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   overflow: hidden;
 }
 
@@ -139,42 +147,63 @@ const handleComplete = () => {
   100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
-/* Header */
+/* Header - Fixed at top */
 .quiz-header {
   background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
-  padding: 24px;
+  padding: 20px;
   text-align: center;
 }
 
 .header-icon {
-  font-size: 48px;
-  margin-bottom: 8px;
+  font-size: 36px;
+  margin-bottom: 6px;
 }
 
 .header-title {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   color: white;
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
 
 .header-subtitle {
-  margin: 8px 0 0;
-  font-size: 14px;
+  margin: 6px 0 0;
+  font-size: 12px;
   color: rgba(255,255,255,0.9);
+}
+
+/* Left and Right Sections */
+.quiz-left {
+  display: flex;
+  flex-direction: column;
+  background: #FFF8F0;
+}
+
+.quiz-right {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
+  background: white;
 }
 
 /* Scenario */
 .scenario-box {
-  padding: 20px 24px;
-  background: #FFF8F0;
-  border-bottom: 3px dashed #FFE66D;
+  padding: 20px;
+  background: white;
+  margin: 16px;
+  border-radius: 16px;
+  border: 3px dashed #FFE66D;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .scenario-text {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #2D3436;
   text-align: center;
@@ -183,17 +212,17 @@ const handleComplete = () => {
 
 /* Options */
 .options-container {
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
 }
 
 .option-card {
   background: white;
   border: 3px solid #E8E8E8;
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 14px;
+  padding: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: left;
@@ -201,9 +230,9 @@ const handleComplete = () => {
 }
 
 .option-card:hover:not(.disabled) {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   border-color: #4ECDC4;
-  box-shadow: 0 8px 24px rgba(78, 205, 196, 0.2);
+  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.2);
 }
 
 .option-card.selected {
@@ -229,27 +258,27 @@ const handleComplete = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .option-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: #2D3436;
 }
 
 .option-price {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   color: #FF6B9D;
   background: #FFF0F5;
-  padding: 4px 12px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  border-radius: 10px;
 }
 
 .option-quality {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
 }
 
@@ -259,19 +288,23 @@ const handleComplete = () => {
   right: 12px;
   background: #4ECDC4;
   color: white;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  padding: 6px 12px;
-  border-radius: 12px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(78, 205, 196, 0.4);
 }
 
 /* Result */
 .result-container {
-  margin: 0 24px 24px;
   padding: 20px;
-  border-radius: 20px;
+  border-radius: 16px;
   text-align: center;
   animation: slideUp 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
 }
 
 @keyframes slideUp {
@@ -290,23 +323,23 @@ const handleComplete = () => {
 }
 
 .result-icon {
-  font-size: 48px;
-  margin-bottom: 8px;
+  font-size: 40px;
+  margin-bottom: 6px;
 }
 
 .result-title {
-  margin: 0 0 8px;
-  font-size: 24px;
+  margin: 0 0 6px;
+  font-size: 22px;
   font-weight: 800;
   color: #2D3436;
   font-family: 'Comic Sans MS', 'Chalkboard', cursive;
 }
 
 .result-tip {
-  margin: 0 0 16px;
-  font-size: 14px;
+  margin: 0 0 14px;
+  font-size: 13px;
   color: #666;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .savings-box {
@@ -314,9 +347,9 @@ const handleComplete = () => {
   align-items: center;
   gap: 8px;
   background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%);
-  padding: 12px 20px;
-  border-radius: 20px;
-  margin-bottom: 16px;
+  padding: 10px 18px;
+  border-radius: 18px;
+  margin-bottom: 14px;
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -326,11 +359,11 @@ const handleComplete = () => {
 }
 
 .savings-icon {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .savings-text {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   color: #2D3436;
 }
@@ -338,15 +371,16 @@ const handleComplete = () => {
 .skills-earned {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 
 .skill-badge {
   background: white;
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: #6C63FF;
   border: 2px solid #6C63FF;
@@ -361,21 +395,21 @@ const handleComplete = () => {
   background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
   color: white;
   border: none;
-  border-radius: 16px;
-  padding: 16px 24px;
-  font-size: 18px;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .btn-continue:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(78, 205, 196, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
 }
 
 .btn-arrow {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* Penny Helper */
@@ -383,29 +417,86 @@ const handleComplete = () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 24px;
-  background: #FFF8F0;
-  border-top: 3px dashed #FFE66D;
+  padding: 16px;
+  background: white;
+  margin: 16px;
+  border-radius: 16px;
+  border: 3px solid #FFE66D;
 }
 
 .penny-img {
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .penny-speech {
   flex: 1;
   background: white;
-  border-radius: 12px;
-  padding: 10px 14px;
+  border-radius: 10px;
+  padding: 8px 12px;
   border: 2px solid #FFE66D;
 }
 
 .penny-speech p {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: #2D3436;
+  line-height: 1.3;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .quiz-card {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+  }
+  
+  .quiz-left {
+    order: 1;
+  }
+  
+  .quiz-right {
+    order: 2;
+  }
+}
+
+@media (max-height: 700px) {
+  .quiz-header {
+    padding: 16px;
+  }
+  
+  .header-icon {
+    font-size: 32px;
+    margin-bottom: 4px;
+  }
+  
+  .header-title {
+    font-size: 18px;
+  }
+  
+  .scenario-box {
+    padding: 16px;
+    margin: 12px;
+  }
+  
+  .options-container {
+    gap: 10px;
+  }
+  
+  .option-card {
+    padding: 10px;
+  }
+  
+  .result-container {
+    padding: 16px;
+  }
+  
+  .penny-helper {
+    padding: 12px;
+    margin: 12px;
+  }
 }
 </style>
