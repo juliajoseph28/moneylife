@@ -202,38 +202,66 @@ User question: ${message}
 
 Respond as Penny would - friendly, helpful, and focused on money education.`
 
-  // For now, using a mock response since we don't have actual Gemini API setup
-  // In production, you'd make an actual API call to Gemini
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
 
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
-
-  // Mock responses based on context and message
-  const responses = [
-    `That's a great question! 💡 Based on what I see, you have $${context.balance} saved toward your ${context.selectedGoal || 'goal'}. Here's what I think: `,
-    `I love that you're thinking about this! 🎯 With your $${context.weeklyIncome} weekly income, you're doing ${context.savingChoices > context.spendingChoices ? 'awesome' : 'okay'} so far. Let me help you with that...`,
-    `Smart thinking! 🧠 You're in week ${context.week} and have saved $${context.totalSaved} total. That's impressive! Here's my advice: `,
-    `You're asking the right questions! ⭐ I can see you've made ${context.savingChoices} saving choices and ${context.spendingChoices} spending choices. Let's work on that balance...`
-  ]
-
-  const baseResponse = responses[Math.floor(Math.random() * responses.length)]
-
-  // Add specific advice based on the message content
-  let specificAdvice = ''
-
-  if (message.toLowerCase().includes('save')) {
-    specificAdvice = 'Try the "save first" rule: When you get money, put some in savings BEFORE you spend anything else. Even $1-2 per week adds up fast! 🐷'
-  } else if (message.toLowerCase().includes('spend')) {
-    specificAdvice = 'Before buying something, ask yourself: "Do I NEED this or just WANT this?" Needs come first, wants can wait. The 24-hour rule helps too - wait a day and see if you still want it! ⏰'
-  } else if (message.toLowerCase().includes('goal')) {
-    specificAdvice = `Your goal of ${context.selectedGoal || 'something special'} is $${context.goal - context.balance} away! At $${context.weeklyIncome} per week, you could reach it in about ${Math.ceil((context.goal - context.balance) / (context.weeklyIncome * 0.6))} weeks if you save 60% of your income. You've got this! 🎯`
-  } else if (message.toLowerCase().includes('happy') || message.toLowerCase().includes('fun')) {
-    specificAdvice = 'Money AND happiness can go together! Try saving 60% for your goals and using 40% for fun things that make you smile. Balance is the key to being both rich AND happy! 😊'
-  } else {
-    specificAdvice = 'Remember the three jars: SAVE (for goals), SPEND (for fun), and SHARE (for others). Start with saving the most, and you\'ll be a money master! 💪'
+  if (!apiKey) {
+    throw new Error('Gemini API key not found. Please add VITE_GEMINI_API_KEY to your .env file.')
   }
 
-  return baseResponse + specificAdvice
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        },
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          }
+        ]
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+      return data.candidates[0].content.parts[0].text
+    } else {
+      throw new Error('Unexpected response format from Gemini API')
+    }
+  } catch (error) {
+    console.error('Gemini API call failed:', error)
+    throw error
+  }
 }
 
 const handleClose = () => {
