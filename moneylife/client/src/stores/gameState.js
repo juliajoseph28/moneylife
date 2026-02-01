@@ -14,7 +14,7 @@ export const levels = [
     icon: '🏡',
     description: 'Learning the basics at home!',
     requiredWeeks: 0,
-    requiredSavings: 0, // Must have positive balance
+    requiredSavings: 0,
     unlocks: ['Home', 'Backyard'],
     color: '#4ECDC4'
   },
@@ -24,7 +24,7 @@ export const levels = [
     icon: '🏘️',
     description: 'Exploring your neighborhood!',
     requiredWeeks: 6,
-    requiredSavings: 15, // Must have saved at least $15
+    requiredSavings: 15,
     unlocks: ['Park', 'Friend\'s House'],
     color: '#667eea'
   },
@@ -70,7 +70,7 @@ export const npcs = {
     id: 'bestFriend',
     name: 'Alex',
     emoji: '👧',
-    relationship: 50, // 0-100
+    relationship: 50,
     description: 'Your best friend from school'
   },
   neighbor: {
@@ -101,36 +101,47 @@ export const npcs = {
 // ============================================
 
 export const gameState = reactive({
-  // Basic stats - SMALLER ALLOWANCE
-  balance: 0, // Start with nothing!
+  // ============================================
+  // BASIC STATS
+  // ============================================
+  balance: 0,
   week: 1,
   health: 50,
   goal: 100,
-  weeklyIncome: 5, // Much smaller - $5 base
+  weeklyIncome: 5,
   ageGroup: 'kids',
   
-  // Financial tracking
+  // ============================================
+  // FINANCIAL TRACKING
+  // ============================================
   totalSaved: 0,
   totalSpent: 0,
   totalEarned: 0,
   savingChoices: 0,
   spendingChoices: 0,
   
-  // Debt & Consequences
+  // ============================================
+  // DEBT & CONSEQUENCES
+  // ============================================
   inDebt: false,
   debtAmount: 0,
   badChoicesStreak: 0,
   goodChoicesStreak: 0,
-  // Happiness Tracking
+  
+  // ============================================
+  // HAPPINESS TRACKING
+  // ============================================
   highHappinessStreak: 0,
   stableHappinessStreak: 0,
   peakHappiness: 50,
   lowestHappiness: 50,
   happinessRecoveries: 0,
   wasLowHappiness: false,
-  missedOpportunities: [], // Things they can't buy anymore
+  missedOpportunities: [],
   
-  // Skills
+  // ============================================
+  // SKILLS
+  // ============================================
   skills: {
     patience: 10,
     planning: 10,
@@ -138,7 +149,9 @@ export const gameState = reactive({
     generosity: 10
   },
   
-  // NPC Relationships
+  // ============================================
+  // NPC RELATIONSHIPS
+  // ============================================
   npcRelationships: {
     bestFriend: 50,
     neighbor: 50,
@@ -146,12 +159,16 @@ export const gameState = reactive({
     petShelter: 50
   },
   
-  // Locked content
-  lockedItems: [], // Items locked due to poor choices
-  unlockedMissions: [], // Special missions earned by good behavior
+  // ============================================
+  // LOCKED CONTENT
+  // ============================================
+  lockedItems: [],
+  unlockedMissions: [],
   lockedMissions: ['help_friend', 'pet_shelter_volunteer', 'neighborhood_sale'],
   
-  // Story tracking
+  // ============================================
+  // STORY TRACKING
+  // ============================================
   storyFlags: {
     helpedFriendBefore: false,
     donatedToShelter: false,
@@ -161,24 +178,34 @@ export const gameState = reactive({
     learnedBudgeting: false
   },
   
-  // Needs vs Wants tracking
+  // ============================================
+  // NEEDS VS WANTS
+  // ============================================
   needsPurchased: 0,
   wantsPurchased: 0,
   
-  // Level & Progression
+  // ============================================
+  // LEVEL & PROGRESSION
+  // ============================================
   currentLevel: 1,
   unlockedLocations: ['Home', 'Backyard'],
   
-  // Challenges
+  // ============================================
+  // CHALLENGES
+  // ============================================
   challengesCompleted: 0,
   correctAnswers: 0,
   shopQuizzesCompleted: 0,
   shopQuizzesCorrect: 0,
   
-  // Badges
+  // ============================================
+  // BADGES
+  // ============================================
   badges: badges.map(b => ({ ...b })),
   
-  // Popup states
+  // ============================================
+  // POPUP STATES
+  // ============================================
   currentChallenge: null,
   showChallenge: false,
   showShopQuiz: false,
@@ -190,9 +217,26 @@ export const gameState = reactive({
   showPennyHelp: false,
   pennySituation: null,
   
-  // Character & Goal
+  // ============================================
+  // CHARACTER & GOAL
+  // ============================================
   selectedCharacter: null,
   selectedGoal: null,
+  
+  // ============================================
+  // TEEN-SPECIFIC FINANCIAL STATE
+  // ============================================
+  emergencyFund: 50,
+  emergencyFundUsed: 0,
+  emergencyFundWarningShown: false,
+  creditCardDebt: 0,
+  creditCardInterestRate: 0.18,
+  creditCardMinPayment: 5,
+  creditCardUsageCount: 0,
+  missedPayments: 0,
+  creditScore: 700,
+  teenBadDecisions: [],
+  teenGoodDecisions: [],
   
   // ============================================
   // GETTERS
@@ -211,12 +255,9 @@ export const gameState = reactive({
   },
   
   get canProgressLevel() {
-    // Cannot progress if in debt!
     if (this.balance < 0) return false
-    
     const nextLevel = levels.find(l => l.id === this.currentLevel + 1)
     if (!nextLevel) return false
-    
     return this.week >= nextLevel.requiredWeeks && 
            this.balance >= nextLevel.requiredSavings
   },
@@ -235,29 +276,24 @@ export const gameState = reactive({
     this.selectedGoal = goal
     this.goal = goal.cost
     
-    // Set income based on character - MUCH SMALLER
     if (character === 'helper') {
-      this.weeklyIncome = 6 // Helpers earn slightly more
+      this.weeklyIncome = 6
       this.skills.responsibility = 15
     } else if (character === 'saver') {
       this.weeklyIncome = 5
       this.skills.patience = 15
     }
     
-    // Start with first week's income only
     this.balance = this.weeklyIncome
     this.totalEarned = this.weeklyIncome
   },
   
-  // CHECK IF PLAYER CAN AFFORD SOMETHING
   canSpend(amount) {
     return this.balance >= amount
   },
   
-  // SPEND MONEY - WITH PROTECTION
   spend(amount, isNeed = false) {
     if (amount > this.balance) {
-      // Cannot spend more than you have!
       return {
         success: false,
         reason: 'not_enough_money',
@@ -278,7 +314,6 @@ export const gameState = reactive({
     return { success: true }
   },
   
-  // EARN MONEY
   earn(amount, source = 'allowance') {
     this.balance += amount
     this.totalEarned += amount
@@ -292,39 +327,38 @@ export const gameState = reactive({
     
     return { success: true }
   },
-  // TRACK HAPPINESS CHANGES - Call this after any health change
-updateHappinessTracking() {
-  if (this.health > this.peakHappiness) {
-    this.peakHappiness = this.health
-  }
-  if (this.health < this.lowestHappiness) {
-    this.lowestHappiness = this.health
-  }
   
-  if (this.health < 30) {
-    this.wasLowHappiness = true
-  }
-  if (this.wasLowHappiness && this.health >= 70) {
-    this.happinessRecoveries++
-    this.wasLowHappiness = false
-  }
-},
-
-// WEEKLY HAPPINESS CHECK - Call this at end of each week
-updateWeeklyHappinessStreaks() {
-  if (this.health >= 70) {
-    this.highHappinessStreak++
-  } else {
-    this.highHappinessStreak = 0
-  }
+  updateHappinessTracking() {
+    if (this.health > this.peakHappiness) {
+      this.peakHappiness = this.health
+    }
+    if (this.health < this.lowestHappiness) {
+      this.lowestHappiness = this.health
+    }
+    
+    if (this.health < 30) {
+      this.wasLowHappiness = true
+    }
+    if (this.wasLowHappiness && this.health >= 70) {
+      this.happinessRecoveries++
+      this.wasLowHappiness = false
+    }
+  },
   
-  if (this.health >= 40) {
-    this.stableHappinessStreak++
-  } else {
-    this.stableHappinessStreak = 0
-  }
-},
-  // SAVE MONEY (choosing not to spend)
+  updateWeeklyHappinessStreaks() {
+    if (this.health >= 70) {
+      this.highHappinessStreak++
+    } else {
+      this.highHappinessStreak = 0
+    }
+    
+    if (this.health >= 40) {
+      this.stableHappinessStreak++
+    } else {
+      this.stableHappinessStreak = 0
+    }
+  },
+  
   save() {
     this.savingChoices++
     this.goodChoicesStreak++
@@ -333,12 +367,10 @@ updateWeeklyHappinessStreaks() {
     this.addSkill('planning', 1)
   },
   
-  // TRACK BAD CHOICE
   makeBadChoice() {
     this.badChoicesStreak++
     this.goodChoicesStreak = 0
     
-    // Check for consequences
     if (this.badChoicesStreak >= 3) {
       return this.triggerConsequence()
     }
@@ -346,7 +378,6 @@ updateWeeklyHappinessStreaks() {
     return null
   },
   
-  // TRIGGER CONSEQUENCE
   triggerConsequence() {
     const consequences = [
       {
@@ -376,7 +407,7 @@ updateWeeklyHappinessStreaks() {
         message: `The ${this.selectedGoal?.name || 'item'} you wanted went on sale, but you didn't have enough saved. Now it's sold out!`,
         effect: () => {
           this.missedOpportunities.push(this.selectedGoal?.name)
-          this.goal = Math.round(this.goal * 1.2) // Goal gets more expensive
+          this.goal = Math.round(this.goal * 1.2)
         },
         lesson: "When we don't save, we miss good deals. The things we want might cost more later!"
       },
@@ -395,14 +426,11 @@ updateWeeklyHappinessStreaks() {
     const consequence = consequences[Math.floor(Math.random() * consequences.length)]
     this.currentConsequence = consequence
     this.showConsequence = true
-    
-    // Reset streak after consequence
     this.badChoicesStreak = 0
     
     return consequence
   },
   
-  // APPLY CONSEQUENCE
   applyConsequence() {
     if (this.currentConsequence?.effect) {
       this.currentConsequence.effect()
@@ -411,37 +439,31 @@ updateWeeklyHappinessStreaks() {
     this.currentConsequence = null
   },
   
-  // CHECK IF PENNY SHOULD HELP
   checkPennyHelp() {
-    // In debt
     if (this.balance < 0) {
       this.pennySituation = 'debt'
       this.showPennyHelp = true
       return true
     }
     
-    // Low balance after multiple weeks
     if (this.balance < this.weeklyIncome && this.week > 3) {
       this.pennySituation = 'low_balance'
       this.showPennyHelp = true
       return true
     }
     
-    // Spending more than saving
     if (this.spendingChoices > this.savingChoices * 2 && this.week > 2) {
       this.pennySituation = 'spending_spree'
       this.showPennyHelp = true
       return true
     }
     
-    // Low happiness
     if (this.health < 25) {
       this.pennySituation = 'low_happiness'
       this.showPennyHelp = true
       return true
     }
     
-    // Bad choices streak
     if (this.badChoicesStreak >= 2) {
       this.pennySituation = 'struggling'
       this.showPennyHelp = true
@@ -456,18 +478,14 @@ updateWeeklyHappinessStreaks() {
     this.pennySituation = null
   },
   
-  // NPC RELATIONSHIP
   changeRelationship(npcId, amount) {
     if (this.npcRelationships[npcId] !== undefined) {
       this.npcRelationships[npcId] = Math.max(0, Math.min(100, this.npcRelationships[npcId] + amount))
     }
-    
-    // Unlock/lock missions based on relationships
     this.updateMissionAvailability()
   },
   
   updateMissionAvailability() {
-    // Unlock help_friend mission if relationship is good
     if (this.npcRelationships.bestFriend >= 60 && !this.storyFlags.missedFriendEvent) {
       const index = this.lockedMissions.indexOf('help_friend')
       if (index > -1) {
@@ -476,7 +494,6 @@ updateWeeklyHappinessStreaks() {
       }
     }
     
-    // Unlock pet shelter if relationship and balance are good
     if (this.npcRelationships.petShelter >= 50 && this.balance >= 10) {
       const index = this.lockedMissions.indexOf('pet_shelter_volunteer')
       if (index > -1) {
@@ -486,28 +503,23 @@ updateWeeklyHappinessStreaks() {
     }
   },
   
-  // LOCK AN ITEM
   lockItem(itemName, reason) {
     if (!this.lockedItems.find(i => i.name === itemName)) {
       this.lockedItems.push({ name: itemName, reason, week: this.week })
     }
   },
   
-  // CHECK IF ITEM IS LOCKED
   isItemLocked(itemName) {
     return this.lockedItems.some(i => i.name === itemName)
   },
   
-  // ADD SKILL
   addSkill(skillName, amount) {
     if (this.skills[skillName] !== undefined) {
       this.skills[skillName] = Math.min(100, Math.max(0, this.skills[skillName] + amount))
     }
   },
   
-  // LEVEL UP CHECK - CANNOT PROGRESS IF IN DEBT
   checkLevelUp() {
-    // CANNOT level up if in debt
     if (this.balance < 0) {
       return false
     }
@@ -522,14 +534,12 @@ updateWeeklyHappinessStreaks() {
         this.newLevel = level
         this.showLevelUp = true
         
-        // Unlock locations
         level.unlocks.forEach(loc => {
           if (!this.unlockedLocations.includes(loc)) {
             this.unlockedLocations.push(loc)
           }
         })
         
-        // Small bonus
         this.balance += 3
         this.addSkill('planning', 5)
         
@@ -544,7 +554,6 @@ updateWeeklyHappinessStreaks() {
     this.newLevel = null
   },
   
-  // CHALLENGES
   maybeShowChallenge() {
     if (this.week > 1 && this.week % 4 === 0 && !this.showShopQuiz) {
       this.currentChallenge = getRandomChallenge()
@@ -567,7 +576,6 @@ updateWeeklyHappinessStreaks() {
     this.currentChallenge = null
   },
   
-  // SHOP QUIZ
   maybeShowShopQuiz() {
     if (this.week > 1 && this.week % 5 === 0) {
       this.currentShopQuiz = getRandomShopQuiz()
@@ -591,54 +599,186 @@ updateWeeklyHappinessStreaks() {
     this.currentShopQuiz = null
   },
   
-// BADGES
-checkBadges() {
-  const newlyUnlocked = []
-  this.badges.forEach(badge => {
-    if (badge.unlocked) return
-    let shouldUnlock = false
-    
-    switch (badge.id) {
-      case 'first_save': shouldUnlock = this.savingChoices >= 1; break
-      case 'quiz_master': shouldUnlock = this.correctAnswers >= 3; break
-      case 'goal_reached': shouldUnlock = this.balance >= this.goal; break
-      case 'week_5': shouldUnlock = this.week >= 5; break
-      case 'balanced': shouldUnlock = this.health >= 50 && this.savingChoices >= 3; break
-      case 'big_saver': shouldUnlock = this.totalSaved >= 30; break
-      case 'shop_smart': shouldUnlock = this.shopQuizzesCorrect >= 2; break
-      case 'skill_master': shouldUnlock = Object.values(this.skills).some(s => s >= 50); break
-      case 'level_up': shouldUnlock = this.currentLevel >= 2; break
-      case 'generous': shouldUnlock = this.storyFlags.donatedToShelter; break
-      case 'good_friend': shouldUnlock = this.npcRelationships.bestFriend >= 80; break
-      case 'no_debt': shouldUnlock = this.week >= 8 && this.balance >= 0 && !this.inDebt; break
+  checkBadges() {
+    const newlyUnlocked = []
+    this.badges.forEach(badge => {
+      if (badge.unlocked) return
+      let shouldUnlock = false
       
-      // Happiness Badges
-      case 'joy_keeper': shouldUnlock = this.highHappinessStreak >= 3; break
-      case 'resilient_spirit': shouldUnlock = this.happinessRecoveries >= 1; break
-      case 'happy_saver': shouldUnlock = this.balance >= (this.goal * 0.5) && this.health >= 60; break
-      case 'wellness_warrior': shouldUnlock = this.stableHappinessStreak >= 8; break
-      case 'mood_master': shouldUnlock = this.happinessRecoveries >= 3; break
-      case 'thriving': shouldUnlock = this.health >= 80 && this.highHappinessStreak >= 1; break
-    }
-    
-    if (shouldUnlock) {
-      badge.unlocked = true
-      newlyUnlocked.push(badge)
+      switch (badge.id) {
+        case 'first_save': shouldUnlock = this.savingChoices >= 1; break
+        case 'quiz_master': shouldUnlock = this.correctAnswers >= 3; break
+        case 'goal_reached': shouldUnlock = this.balance >= this.goal; break
+        case 'week_5': shouldUnlock = this.week >= 5; break
+        case 'balanced': shouldUnlock = this.health >= 50 && this.savingChoices >= 3; break
+        case 'big_saver': shouldUnlock = this.totalSaved >= 30; break
+        case 'shop_smart': shouldUnlock = this.shopQuizzesCorrect >= 2; break
+        case 'skill_master': shouldUnlock = Object.values(this.skills).some(s => s >= 50); break
+        case 'level_up': shouldUnlock = this.currentLevel >= 2; break
+        case 'generous': shouldUnlock = this.storyFlags.donatedToShelter; break
+        case 'good_friend': shouldUnlock = this.npcRelationships.bestFriend >= 80; break
+        case 'no_debt': shouldUnlock = this.week >= 8 && this.balance >= 0 && !this.inDebt; break
+        case 'joy_keeper': shouldUnlock = this.highHappinessStreak >= 3; break
+        case 'resilient_spirit': shouldUnlock = this.happinessRecoveries >= 1; break
+        case 'happy_saver': shouldUnlock = this.balance >= (this.goal * 0.5) && this.health >= 60; break
+        case 'wellness_warrior': shouldUnlock = this.stableHappinessStreak >= 8; break
+        case 'mood_master': shouldUnlock = this.happinessRecoveries >= 3; break
+        case 'thriving': shouldUnlock = this.health >= 80 && this.highHappinessStreak >= 1; break
+      }
       
-      // Award skill points
-      if (badge.skillKey === 'all') {
-        Object.keys(this.skills).forEach(skill => {
-          this.addSkill(skill, badge.skillAmount || 5)
-        })
-      } else if (badge.skillKey) {
-        this.addSkill(badge.skillKey, badge.skillAmount || 5)
+      if (shouldUnlock) {
+        badge.unlocked = true
+        newlyUnlocked.push(badge)
+        
+        if (badge.skillKey === 'all') {
+          Object.keys(this.skills).forEach(skill => {
+            this.addSkill(skill, badge.skillAmount || 5)
+          })
+        } else if (badge.skillKey) {
+          this.addSkill(badge.skillKey, badge.skillAmount || 5)
+        }
+      }
+    })
+    return newlyUnlocked
+  },
+  
+  // ============================================
+  // TEEN METHODS
+  // ============================================
+  
+  useEmergencyFund(amount) {
+    if (amount > this.emergencyFund) {
+      return { 
+        success: false, 
+        reason: 'insufficient_funds',
+        message: `You only have $${this.emergencyFund} in your emergency fund!`
       }
     }
-  })
-  return newlyUnlocked
-},
+    
+    this.emergencyFund -= amount
+    this.emergencyFundUsed += amount
+    this.balance += amount
+    
+    this.teenBadDecisions.push({
+      type: 'emergency_fund_used',
+      amount: amount,
+      week: this.week,
+      remainingFund: this.emergencyFund
+    })
+    
+    this.addSkill('responsibility', -3)
+    this.addSkill('planning', -2)
+    
+    return { 
+      success: true, 
+      remaining: this.emergencyFund,
+      message: `Used $${amount} from emergency fund. $${this.emergencyFund} remaining.`
+    }
+  },
   
-  // RESET
+  useCreditCard(amount) {
+    this.creditCardDebt += amount
+    this.creditCardUsageCount++
+    this.balance += amount
+    
+    this.teenBadDecisions.push({
+      type: 'credit_card_used',
+      amount: amount,
+      week: this.week,
+      totalDebt: this.creditCardDebt
+    })
+    
+    if (this.creditCardDebt > 100) {
+      this.creditScore = Math.max(300, this.creditScore - 10)
+    }
+    
+    this.addSkill('planning', -3)
+    this.addSkill('patience', -2)
+    
+    return { 
+      success: true, 
+      newDebt: this.creditCardDebt,
+      message: `Charged $${amount} to credit card. Total debt: $${this.creditCardDebt}`
+    }
+  },
+  
+  applyCreditCardInterest() {
+    if (this.creditCardDebt > 0) {
+      const monthlyRate = this.creditCardInterestRate / 12
+      const weeklyRate = monthlyRate / 4
+      const interest = Math.round(this.creditCardDebt * weeklyRate * 100) / 100
+      this.creditCardDebt += interest
+      this.creditCardDebt = Math.round(this.creditCardDebt * 100) / 100
+      return interest
+    }
+    return 0
+  },
+  
+  makeCreditCardPayment(amount) {
+    const payment = Math.min(amount, this.creditCardDebt)
+    this.creditCardDebt -= payment
+    this.balance -= payment
+    
+    if (payment >= this.creditCardMinPayment) {
+      this.creditScore = Math.min(850, this.creditScore + 5)
+      this.missedPayments = 0
+    }
+    
+    return { success: true, paid: payment, remaining: this.creditCardDebt }
+  },
+  
+  checkMissedPayment() {
+    if (this.creditCardDebt > 0 && this.balance < this.creditCardMinPayment) {
+      this.missedPayments++
+      this.creditScore = Math.max(300, this.creditScore - 20)
+      return true
+    }
+    return false
+  },
+  
+  triggerEmergencyEvent() {
+    const emergencies = [
+      { name: 'Phone screen cracked', cost: 30 },
+      { name: 'Lost bus pass - need new one', cost: 15 },
+      { name: 'School project supplies needed', cost: 20 },
+      { name: 'Friend needs help with emergency', cost: 25 },
+      { name: 'Bike repair needed', cost: 18 }
+    ]
+    
+    const emergency = emergencies[Math.floor(Math.random() * emergencies.length)]
+    
+    if (this.emergencyFund >= emergency.cost) {
+      return { 
+        canHandle: true, 
+        emergency,
+        message: `Good thing you have your emergency fund! You can cover this.`
+      }
+    } else {
+      return { 
+        canHandle: false, 
+        emergency,
+        shortfall: emergency.cost - this.emergencyFund,
+        message: `Uh oh! You don't have enough in your emergency fund. You'll need to use your credit card or miss out.`
+      }
+    }
+  },
+  
+  // ============================================
+  // RESET METHODS
+  // ============================================
+  
+  resetTeenState() {
+    this.emergencyFund = 50
+    this.emergencyFundUsed = 0
+    this.emergencyFundWarningShown = false
+    this.creditCardDebt = 0
+    this.creditCardUsageCount = 0
+    this.missedPayments = 0
+    this.creditScore = 700
+    this.teenBadDecisions = []
+    this.teenGoodDecisions = []
+  },
+  
   reset() {
     this.balance = 0
     this.week = 1
@@ -654,6 +794,12 @@ checkBadges() {
     this.debtAmount = 0
     this.badChoicesStreak = 0
     this.goodChoicesStreak = 0
+    this.highHappinessStreak = 0
+    this.stableHappinessStreak = 0
+    this.peakHappiness = 50
+    this.lowestHappiness = 50
+    this.happinessRecoveries = 0
+    this.wasLowHappiness = false
     this.missedOpportunities = []
     this.skills = { patience: 10, planning: 10, responsibility: 10, generosity: 10 }
     this.npcRelationships = { bestFriend: 50, neighbor: 50, shopkeeper: 50, petShelter: 50 }
@@ -689,13 +835,9 @@ checkBadges() {
     this.pennySituation = null
     this.selectedCharacter = null
     this.selectedGoal = null
-    // Add these in reset() method
-    this.highHappinessStreak = 0
-    this.stableHappinessStreak = 0
-    this.peakHappiness = 50
-    this.lowestHappiness = 50
-    this.happinessRecoveries = 0
-    this.wasLowHappiness = false
+    
+    // Reset teen state
+    this.resetTeenState()
   }
 })
 

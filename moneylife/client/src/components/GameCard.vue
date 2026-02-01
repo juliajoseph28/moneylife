@@ -35,7 +35,6 @@
                   <span v-if="choice.effects?.health" class="effect-tag health">
                     ❤️ {{ choice.effects.health > 0 ? '+' : '' }}{{ choice.effects.health }}
                   </span>
-                  <!-- Show "Can't Afford" warning -->
                   <span v-if="!canAffordChoice(choice)" class="effect-tag cant-afford">
                     🚫 Need ${{ getAmountNeeded(choice) }} more
                   </span>
@@ -95,8 +94,9 @@
       </div>
     </div>
     
-        <!-- Penny Advice Popup (when can't afford) -->
+    <!-- Kids Version - Penny Advice Popup -->
     <PennyAdvice
+      v-if="!isTeenMode"
       :show="showPennyAdvice"
       :item-name="attemptedChoice?.text || 'this item'"
       :item-cost="Math.abs(attemptedChoice?.effects?.balance || 0)"
@@ -109,6 +109,26 @@
       @open-chat="openChatFromAdvice"
     />
     
+    <!-- Teen Version - Penny Advice Popup -->
+    <PennyAdviceTeen
+      v-if="isTeenMode"
+      :show="showPennyAdvice"
+      :item-name="attemptedChoice?.text || 'this item'"
+      :item-cost="Math.abs(attemptedChoice?.effects?.balance || 0)"
+      :current-balance="currentBalance"
+      :weekly-income="weeklyIncome"
+      :emergency-fund="emergencyFund"
+      :current-debt="currentDebt"
+      :goal-name="goalName"
+      :goal-cost="goalCost"
+      @close="closePennyAdviceAndSkip"
+      @choose-different="closePennyAdvice"
+      @open-chat="openChatFromAdvice"
+      @use-credit="handleUseCreditCard"
+      @use-emergency="handleUseEmergencyFund"
+      @save-up="handleSaveUp"
+    />
+    
     <!-- Gemini Chatbox -->
     <GeminiChatbox
       :show="showGeminiChat"
@@ -119,10 +139,11 @@
 </template>
 
 <script setup>
-import GeminiChatbox from '@/components/GeminiChatbox.vue'
 import { ref, computed } from 'vue'
 import { gameState } from '@/stores/gameState'
 import PennyAdvice from '@/components/PennyAdvice.vue'
+import PennyAdviceTeen from '@/components/PennyAdviceTeen.vue'
+import GeminiChatbox from '@/components/GeminiChatbox.vue'
 
 const props = defineProps({
   scenario: Object
@@ -130,6 +151,7 @@ const props = defineProps({
 
 const emit = defineEmits(['choice', 'next'])
 
+// State
 const selectedChoice = ref(null)
 const showOutcome = ref(false)
 const showPennyAdvice = ref(false)
@@ -137,9 +159,10 @@ const attemptedChoice = ref(null)
 const showGeminiChat = ref(false)
 const chatContext = ref('')
 
-// Get current game state values
-const getCurrentWeek = () => gameState.week || 1
-const getCurrentLevel = () => gameState.currentLevel || 1
+// Computed
+const isTeenMode = computed(() => gameState.ageGroup === 'teen')
+const emergencyFund = computed(() => gameState.emergencyFund || 50)
+const currentDebt = computed(() => gameState.creditCardDebt || 0)
 const currentBalance = computed(() => gameState.balance || 0)
 const weeklyIncome = computed(() => gameState.weeklyIncome || 5)
 const goalName = computed(() => gameState.selectedGoal?.name || 'your prize')
@@ -155,16 +178,16 @@ const outcomeIcon = computed(() => {
   }
 })
 
-// Check if user can afford a choice
+// Helper Functions
+const getCurrentWeek = () => gameState.week || 1
+const getCurrentLevel = () => gameState.currentLevel || 1
+
 const canAffordChoice = (choice) => {
   const cost = choice.effects?.balance || 0
-  // If it's earning money (positive) or free, always affordable
   if (cost >= 0) return true
-  // Check if they have enough to cover the cost
   return currentBalance.value >= Math.abs(cost)
 }
 
-// Get amount needed for a choice
 const getAmountNeeded = (choice) => {
   const cost = Math.abs(choice.effects?.balance || 0)
   return Math.max(0, cost - currentBalance.value)
@@ -193,29 +216,16 @@ const formatCost = (choice) => {
   return '$0'
 }
 
-// Handle choice click - check affordability first
+// Choice Handlers
 const handleChoiceClick = (choice) => {
   if (!canAffordChoice(choice)) {
-    // Can't afford - show Penny's advice!
     attemptedChoice.value = choice
     showPennyAdvice.value = true
     return
   }
-  
-  // Can afford - proceed with choice
   selectChoice(choice)
 }
-// Open Gemini chat with context about what they're struggling with
-const openChatFromAdvice = () => {
-  const choice = attemptedChoice.value
-  const cost = Math.abs(choice?.effects?.balance || 0)
-  const needed = cost - currentBalance.value
-  
-  chatContext.value = `The child tried to spend $${cost} on "${choice?.text}" but only has $${currentBalance.value}. They need $${needed} more. They're looking at the savings timeline but still need help understanding. Please explain in very simple, friendly language why they can't afford this right now and how saving works.`
-  
-  showPennyAdvice.value = false
-  showGeminiChat.value = true
-}
+
 const selectChoice = (choice) => {
   selectedChoice.value = choice
   emit('choice', choice)
@@ -224,6 +234,7 @@ const selectChoice = (choice) => {
   }, 300)
 }
 
+// Penny Advice Handlers
 const closePennyAdvice = () => {
   showPennyAdvice.value = false
   attemptedChoice.value = null
@@ -235,6 +246,47 @@ const closePennyAdviceAndSkip = () => {
   emit('next')
 }
 
+const openChatFromAdvice = () => {
+  const choice = attemptedChoice.value
+  const cost = Math.abs(choice?.effects?.balance || 0)
+  const needed = cost - currentBalance.value
+  
+  chatContext.value = `The child tried to spend $${cost} on "${choice?.text}" but only has $${currentBalance.value}. They need $${needed} more. Please explain in simple, friendly language why they can't afford this right now and how saving works.`
+  
+  showPennyAdvice.value = false
+  showGeminiChat.value = true
+}
+
+// Teen-Specific Handlers
+const handleUseCreditCard = (amount) => {
+  const result = gameState.useCreditCard(amount)
+  if (result.success) {
+    showPennyAdvice.value = false
+    selectChoice(attemptedChoice.value)
+  }
+}
+
+const handleUseEmergencyFund = (amount) => {
+  const result = gameState.useEmergencyFund(amount)
+  if (result.success) {
+    showPennyAdvice.value = false
+    selectChoice(attemptedChoice.value)
+  }
+}
+
+const handleSaveUp = () => {
+  gameState.teenGoodDecisions.push({
+    type: 'chose_to_save',
+    item: attemptedChoice.value?.text,
+    cost: Math.abs(attemptedChoice.value?.effects?.balance || 0),
+    week: gameState.week
+  })
+  gameState.addSkill('patience', 5)
+  gameState.addSkill('planning', 3)
+  closePennyAdvice()
+}
+
+// Navigation
 const nextWeek = () => {
   showOutcome.value = false
   selectedChoice.value = null
@@ -261,10 +313,6 @@ const nextWeek = () => {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-/* =====================
-   QUESTION CARD LAYOUT
-   ===================== */
 
 .card-layout {
   display: grid;
@@ -338,7 +386,6 @@ const nextWeek = () => {
   border-radius: 16px;
 }
 
-/* Choices Section */
 .choices-section {
   display: flex;
   flex-direction: column;
@@ -404,7 +451,6 @@ const nextWeek = () => {
   background: linear-gradient(135deg, #FFFDF0 0%, white 100%);
 }
 
-/* Can't Afford Styling */
 .choice-btn.cant-afford {
   border-color: #DDD;
   background: #F5F5F5;
@@ -479,7 +525,6 @@ const nextWeek = () => {
   text-decoration: line-through;
 }
 
-/* Balance Reminder */
 .balance-reminder {
   display: flex;
   align-items: center;
@@ -505,10 +550,6 @@ const nextWeek = () => {
   color: #4ECDC4;
   font-size: 16px;
 }
-
-/* =====================
-   OUTCOME CARD LAYOUT
-   ===================== */
 
 .outcome-card {
   text-align: left;
@@ -597,7 +638,6 @@ const nextWeek = () => {
   font-size: 18px;
 }
 
-/* Outcome Side */
 .outcome-side {
   display: flex;
   flex-direction: column;
@@ -667,10 +707,6 @@ const nextWeek = () => {
   0%, 100% { transform: translateX(0); }
   50% { transform: translateX(5px); }
 }
-
-/* =====================
-   RESPONSIVE
-   ===================== */
 
 @media (max-width: 800px) {
   .card-layout,
