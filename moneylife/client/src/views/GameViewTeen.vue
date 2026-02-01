@@ -288,7 +288,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { gameState, levels, skillDefinitions } from '@/stores/gameState'
-import { scenarios } from '@/data/scenarios'
+import { scenariosTeen } from '@/data/scenariosTeen'
 
 // ============================================
 // COMPONENT IMPORTS
@@ -371,8 +371,8 @@ const goalImage = computed(() => {
 
 // Current scenario
 const currentScenario = computed(() => {
-  if (!scenarios || scenarios.length === 0) return null
-  return scenarios[scenarioIndex.value % scenarios.length]
+  if (!scenariosTeen || scenariosTeen.length === 0) return null
+  return scenariosTeen[scenarioIndex.value % scenariosTeen.length]
 })
 
 // ============================================
