@@ -158,7 +158,15 @@
     <!-- ============================================ -->
     <!-- ALL POPUPS GO HERE -->
     <!-- ============================================ -->
-    
+    <!-- Add this with your other popups in the template -->
+
+    <!-- Credit Card Statement Popup (every 4 weeks when there's debt) -->
+    <CreditCardStatementPopup
+    :show="gameState.showCreditCardStatement"
+    @close="handleCreditCardStatementClose"
+    @paid="handleCreditCardPaid"
+    @skipped="handleCreditCardSkipped"
+    />
     <!-- Challenge Popup -->
     <ChallengePopup
       :show="gameState.showChallenge"
@@ -206,6 +214,8 @@
 </template>
 
 <script setup>
+// Add this import with your other component imports
+import CreditCardStatementPopup from '@/components/CreditCardStatementPopup.vue'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { gameState, levels, skillDefinitions } from '@/stores/gameState'
@@ -223,7 +233,41 @@ import LevelUpPopup from '@/components/LevelUpPopup.vue'
 import BadgePopup from '@/components/BadgePopup.vue'
 import PennyHelp from '@/components/PennyHelp.vue'
 import GeminiChatbox from '@/components/GeminiChatbox.vue'
+// ============================================
+// CREDIT CARD STATEMENT HANDLERS
+// ============================================
 
+const handleCreditCardStatementClose = () => {
+  gameState.dismissCreditCardStatement()
+}
+
+const handleCreditCardPaid = (result) => {
+  console.log('💳 Credit card payment made:', result)
+  
+  // Show feedback based on payment type
+  if (result.type === 'full') {
+    // Could show a success toast/notification
+    console.log('🎉 Paid in full! No interest charges.')
+  } else if (result.type === 'partial') {
+    console.log(`💰 Paid $${result.amount}. Remaining: $${result.remaining}`)
+  }
+  
+  gameState.dismissCreditCardStatement()
+  
+  // Check for any badges related to credit management
+  checkForBadges()
+}
+
+const handleCreditCardSkipped = (result) => {
+  console.log('⚠️ Credit card payment skipped:', result)
+  console.log(`New debt: $${result.newDebt} (Interest added: $${result.interestAdded})`)
+  console.log(`Credit score dropped to: ${result.newScore}`)
+  
+  gameState.dismissCreditCardStatement()
+  
+  // Maybe show a warning notification here
+  // showNotification('Payment Missed!', 'Your debt grew and credit score dropped.', 'warning')
+}
 // ============================================
 // IMAGE IMPORTS
 // ============================================
@@ -290,7 +334,8 @@ const currentScenario = computed(() => {
   return scenarios[scenarioIndex.value % scenarios.length]
 })
 
-// ============================================
+// =======================================================
+// ==========
 // HELPER FUNCTIONS
 // ============================================
 const getSkillIcon = (key) => skillDefinitions[key]?.icon || '⭐'
@@ -384,20 +429,57 @@ const handleChoice = (choice) => {
 }
 
 const handleNext = () => {
-  gameState.balance += gameState.weeklyIncome
+  // Add biweekly income
+  if (gameState.week % 2 === 0) {
+    gameState.balance += gameState.weeklyIncome
+    
+    // Grow investments if any
+    if (gameState.investmentPortfolio > 0) {
+      const growth = Math.round(gameState.investmentPortfolio * 0.02) // 2% growth
+      gameState.investmentPortfolio += growth
+      gameState.investmentReturns += growth
+    }
+  }
+  
   gameState.addSkill('responsibility', 1)
   gameState.week++
   
-  const leveledUp = gameState.checkLevelUp()
-  if (leveledUp) return
+  // Check for level up first
+  if (gameState.checkLevelUp && gameState.checkLevelUp()) {
+    return // Stop here, level up popup will show
+  }
   
-  if (gameState.maybeShowShopQuiz()) return
-  if (gameState.maybeShowChallenge()) return
+  // =============================================
+  // CHECK FOR CREDIT CARD STATEMENT (ADD THIS!)
+  // =============================================
+  if (gameState.maybeShowCreditCardStatement()) {
+    return // Stop here, credit card popup will show
+  }
   
-  gameState.updateWeeklyHappinessStreaks()
-  checkForBadges()
-  checkForPennyHelp()
-  advanceGame()
+  // Check for shop quiz
+  if (gameState.maybeShowShopQuiz && gameState.maybeShowShopQuiz()) {
+    return
+  }
+  
+  // Check for random challenge
+  if (gameState.maybeShowChallenge && gameState.maybeShowChallenge()) {
+    return
+  }
+  
+  // Check for badges
+  if (typeof checkForBadges === 'function') {
+    checkForBadges()
+  }
+  
+  // Check if Penny should help
+  if (typeof checkForPennyHelp === 'function') {
+    checkForPennyHelp()
+  }
+  
+  // Continue game
+  if (typeof advanceGame === 'function') {
+    advanceGame()
+  }
 }
 
 const handleLevelUpClose = () => {
