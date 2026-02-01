@@ -74,7 +74,7 @@ export const scenarios = [
         emoji: '⏰',
         text: "Wait for a sale", 
         cost: 0,
-        effects: { balance: 0, health: 0 },
+        effects: { balance: 0, health: -5 },
         outcome: {
           type: 'positive',
           title: 'Smart move!',
@@ -157,7 +157,7 @@ export const scenarios = [
         emoji: '📸',
         text: "Take a pic, save up", 
         cost: 0,
-        effects: { balance: 0, health: 0 },
+        effects: { balance: 0, health: -5 },
         outcome: {
           type: 'positive',
           title: 'Wish list!',
@@ -170,7 +170,7 @@ export const scenarios = [
         emoji: '🚶',
         text: "My shoes are fine", 
         cost: 0,
-        effects: { balance: 0, health: 0 },
+        effects: { balance: 0, health: -5 },
         outcome: {
           type: 'positive',
           title: 'Confident choice!',
@@ -349,7 +349,7 @@ export const scenarios = [
         emoji: '⏳',
         text: "Maybe next month", 
         cost: 0,
-        effects: { balance: 0, health: 0 },
+        effects: { balance: 0, health: -5 },
         outcome: {
           type: 'negative',
           title: 'Postponed dreams',
