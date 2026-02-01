@@ -83,13 +83,22 @@
         </div>
       </aside>
       
-      <!-- Center - Main Game Area -->
+            <!-- Center - Main Game Area -->
       <main class="main-content">
+        <!-- Regular Game Card -->
         <GameCard 
-          v-if="currentScenario && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp"
+          v-if="currentScenario && currentScenario.type !== 'value-picker' && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp"
           :scenario="currentScenario"
           @choice="handleChoice"
           @next="handleNext"
+        />
+        
+        <!-- Value Picker Card (NEW!) -->
+        <ValuePickerCard
+          v-else-if="currentScenario && currentScenario.type === 'value-picker' && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp"
+          :scenario="currentScenario"
+          @complete="handleValuePickerComplete"
+          @skip="handleNext"
         />
         
         <!-- Empty state -->
@@ -209,7 +218,7 @@ import ShopQuizPopup from '@/components/ShopQuizPopup.vue'
 import LevelUpPopup from '@/components/LevelUpPopup.vue'
 import BadgePopup from '@/components/BadgePopup.vue'
 import PennyHelp from '@/components/PennyHelp.vue'  // <-- NEW IMPORT
-
+import ValuePickerCard from '@/components/ValuePickerCard.vue'
 // ============================================
 // IMAGE IMPORTS
 // ============================================
@@ -467,6 +476,16 @@ const handlePennyHelped = () => {
   gameState.addSkill('planning', 2)
 }
 
+// ============================================
+// VALUE PICKER HANDLER
+// ============================================
+const handleValuePickerComplete = (result) => {
+  // Check for badges after value picker
+  checkForBadges()
+  
+  // Advance to next scenario
+  advanceGame()
+}
 // ============================================
 // BADGE & GAME PROGRESSION
 // ============================================
