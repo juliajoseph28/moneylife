@@ -148,8 +148,13 @@
                 </span>
               </div>
               <div class="metric">
-                <span class="metric-label">Risk Level</span>
-                <span class="metric-value">{{ gameState.investmentRisk }}</span>
+                <button 
+                  class="invest-btn" 
+                  @click="investMoney"
+                  :disabled="gameState.balance < 10"
+                >
+                  Invest $10
+                </button>
               </div>
             </div>
           </div>
@@ -170,8 +175,13 @@
                 <span class="metric-value">${{ gameState.emergencyFundUsed }}</span>
               </div>
               <div class="metric">
-                <span class="metric-label">Coverage</span>
-                <span class="metric-value">{{ Math.round((gameState.emergencyFund / gameState.weeklyIncome) * 4) }} weeks</span>
+                <button 
+                  class="add-funds-btn" 
+                  @click="addToEmergencyFund"
+                  :disabled="gameState.balance < 5"
+                >
+                  Add $5 to Fund
+                </button>
               </div>
             </div>
           </div>
@@ -479,11 +489,40 @@ const handleChoice = (choice) => {
   }
 }
 
+// Handle adding money to emergency fund
+const addToEmergencyFund = () => {
+  const amount = 5
+  if (gameState.balance >= amount) {
+    gameState.balance -= amount
+    gameState.emergencyFund += amount
+    gameState.addSkill('planning', 2)
+    gameState.addSkill('responsibility', 1)
+  }
+}
+
+// Handle investing money
+const investMoney = () => {
+  const amount = 10
+  if (gameState.balance >= amount) {
+    gameState.balance -= amount
+    gameState.investmentPortfolio += amount
+    gameState.addSkill('planning', 3)
+    gameState.addSkill('patience', 2)
+  }
+}
+
 // Handle moving to next week
 const handleNext = () => {
   // Add biweekly income (every 2 weeks)
   if (gameState.week % 2 === 0) {
     gameState.balance += gameState.weeklyIncome
+    
+    // Grow investments by 20% every 2 weeks
+    if (gameState.investmentPortfolio > 0) {
+      const growth = Math.round(gameState.investmentPortfolio * 0.20)
+      gameState.investmentPortfolio += growth
+      gameState.investmentReturns += growth
+    }
   }
   gameState.addSkill('responsibility', 1)
   
@@ -1058,6 +1097,62 @@ const advanceGame = () => {
 
 .metric-value.poor {
   color: #FF6B6B;
+}
+
+.add-funds-btn {
+  background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.add-funds-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #44A08D 0%, #3A8B7A 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+}
+
+.add-funds-btn:disabled {
+  background: #E8E8E8;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.invest-btn {
+  background: linear-gradient(135deg, #FFD93D 0%, #FFE66D 100%);
+  color: #2D3436;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.invest-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #FFE66D 0%, #FFD93D 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 217, 61, 0.3);
+}
+
+.invest-btn:disabled {
+  background: #E8E8E8;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Card specific colors */
