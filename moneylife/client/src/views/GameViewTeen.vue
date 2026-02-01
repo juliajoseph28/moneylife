@@ -395,8 +395,10 @@ const handleChoice = (choice) => {
 
 // Handle moving to next week
 const handleNext = () => {
-  // Add weekly income
-  gameState.balance += gameState.weeklyIncome
+  // Add biweekly income (every 2 weeks)
+  if (gameState.week % 2 === 0) {
+    gameState.balance += gameState.weeklyIncome
+  }
   gameState.addSkill('responsibility', 1)
   
   // Advance week

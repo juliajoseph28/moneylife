@@ -333,9 +333,9 @@ import { useRouter } from 'vue-router'
 import { useGameStore } from '@/stores/gameState'
 
 // Import images
-import toyImage from '@/assets/images/kids/doll toy cartoon.png'
-import artImage from '@/assets/images/kids/crayon box.png'
-import gameImage from '@/assets/images/kids/game controler.png'
+import toyImage from '@/assets/images/teens/airpods.png'
+import artImage from '@/assets/images/teens/tickets.png'
+import gameImage from '@/assets/images/teens/game.png'
 
 const router = useRouter()
 const store = useGameStore()
