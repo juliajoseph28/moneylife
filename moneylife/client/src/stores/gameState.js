@@ -280,7 +280,13 @@ export const gameState = reactive({
       this.weeklyIncome = 6
       this.skills.responsibility = 15
     } else if (character === 'saver') {
-      this.weeklyIncome = 5
+      this.weeklyIncome = 4
+      this.skills.patience = 15
+    } else if (character === 'part-time') {
+      this.weeklyIncome = 50
+      this.skills.patience = 15
+    } else if (character === 'freelancer') {
+      this.weeklyIncome = 40
       this.skills.patience = 15
     }
     
