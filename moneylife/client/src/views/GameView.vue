@@ -138,10 +138,6 @@
               <span class="weekly-value positive">+${{ gameState.weeklyIncome }}</span>
             </div>
             <div class="weekly-stat">
-              <span class="weekly-label">Saved</span>
-              <span class="weekly-value">${{ gameState.totalSaved }}</span>
-            </div>
-            <div class="weekly-stat">
               <span class="weekly-label">Spent</span>
               <span class="weekly-value negative">${{ gameState.totalSpent }}</span>
             </div>

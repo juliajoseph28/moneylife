@@ -36,11 +36,6 @@
             <span class="stat-label">Weeks</span>
           </div>
           <div class="stat-card">
-            <span class="stat-icon">💰</span>
-            <span class="stat-value">${{ gameState.totalSaved }}</span>
-            <span class="stat-label">Saved</span>
-          </div>
-          <div class="stat-card">
             <span class="stat-icon">🛍️</span>
             <span class="stat-value">${{ gameState.totalSpent }}</span>
             <span class="stat-label">Spent</span>
