@@ -207,9 +207,9 @@ import PennyHelp from '@/components/PennyHelp.vue'  // <-- NEW IMPORT
 // ============================================
 // IMAGE IMPORTS
 // ============================================
-import toyImage from '@/assets/images/kids/doll toy cartoon.png'
-import artImage from '@/assets/images/kids/crayon box.png'
-import gameImage from '@/assets/images/kids/game controler.png'
+import podsImage from '@/assets/images/teens/airpods.png'
+import ticketsImage from '@/assets/images/teens/tickets.png'
+import game2Image from '@/assets/images/teens/gameController.png'
 
 const router = useRouter()
 
@@ -267,10 +267,10 @@ const weeksToGoal = computed(() => {
 // Goal image
 const goalImage = computed(() => {
   const goalName = gameState.selectedGoal?.name?.toLowerCase() || ''
-  if (goalName.includes('toy') || goalName.includes('phone')) return toyImage
-  if (goalName.includes('art') || goalName.includes('concert')) return artImage
-  if (goalName.includes('game') || goalName.includes('gaming')) return gameImage
-  return toyImage
+  if (goalName.includes('airpods')) return podsImage
+  if (goalName.includes('concert')) return ticketsImage
+  if (goalName.includes('gaming')) return game2Image
+  return podsImage
 })
 
 // Current scenario

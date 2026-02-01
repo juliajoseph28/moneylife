@@ -213,9 +213,9 @@ import PennyHelp from '@/components/PennyHelp.vue'  // <-- NEW IMPORT
 // ============================================
 // IMAGE IMPORTS
 // ============================================
-import toyImage from '@/assets/images/kids/doll toy cartoon.png'
-import artImage from '@/assets/images/kids/crayon box.png'
-import gameImage from '@/assets/images/kids/game controler.png'
+import toyImage from '@/assets/images/kids/dollToy.png'
+import artImage from '@/assets/images/kids/crayonBox.png'
+import gameImage from '@/assets/images/kids/gameController.png'
 
 const router = useRouter()
 
