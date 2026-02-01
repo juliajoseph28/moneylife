@@ -410,7 +410,7 @@ const teenCharacters = [
 ]
 
 const teenGoals = [
-  { name: 'New Phone', cost: 200, image: toyImage, color: '#FF6B9D' }, // Using same image for now
+  { name: 'AirPods', cost: 200, image: toyImage, color: '#FF6B9D' }, // Using same image for now
   { name: 'Gaming Setup', cost: 300, image: gameImage, color: '#4ECDC4' },
   { name: 'Concert Tickets', cost: 150, image: artImage, color: '#6C63FF' }
 ]
