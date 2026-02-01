@@ -111,9 +111,12 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { gameState, levels, skillDefinitions } from '@/stores/gameState'
 
-import toyImage from '@/assets/images/kids/doll toy cartoon.png'
-import artImage from '@/assets/images/kids/crayon box.png'
-import gameImage from '@/assets/images/kids/game controler.png'
+import toyImage from '@/assets/images/kids/dollToy.png'
+import artImage from '@/assets/images/kids/crayonBox.png'
+import gameImage from '@/assets/images/kids/gameController.png'
+import podsImage from '@/assets/images/teens/airpods.png'
+import ticketsImage from '@/assets/images/teens/tickets.png'
+import game2Image from '@/assets/images/teens/gameController.png'
 
 const router = useRouter()
 const isWinner = computed(() => gameState.balance >= gameState.goal)
@@ -124,7 +127,10 @@ const goalImage = computed(() => {
   const name = gameState.selectedGoal?.name?.toLowerCase() || ''
   if (name.includes('toy')) return toyImage
   if (name.includes('art')) return artImage
-  return gameImage
+  if (name.includes('game')) return gameImage
+  if (name.includes('airpods')) return podsImage
+  if (name.includes('tickets')) return ticketsImage
+  return game2Image
 })
 
 const getSkillIcon = (key) => skillDefinitions[key]?.icon || '⭐'
