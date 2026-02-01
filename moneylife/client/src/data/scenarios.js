@@ -1,11 +1,13 @@
 // src/data/scenarios.js
 
 export const scenarios = [
+  // Week 1 - Regular choice
   {
     id: 1,
+    type: 'choice',
     emoji: '🎂',
     title: "FRIEND'S BIRTHDAY",
-    description: "Your best friend is turning 15! They're having dinner at a restaurant.",
+    description: "Your best friend is throwing a birthday party! They're having dinner at a restaurant.",
     prompt: "Wanna come? It's $25",
     choices: [
       { 
@@ -49,8 +51,52 @@ export const scenarios = [
       }
     ]
   },
+
+  // Week 2 - VALUE PICKER (NEW!)
   {
     id: 2,
+    type: 'value-picker',
+    emoji: '🎒',
+    title: 'Which Backpack Would You Buy?',
+    description: 'You need a new backpack for school. Let\'s find the best deal!',
+    products: [
+      {
+        id: 'cheap',
+        name: 'Cheap Bag',
+        emoji: '🎒',
+        price: 5,
+        quality: 1,
+        durability: '3 months',
+        features: 'No pockets',
+        isBestValue: false
+      },
+      {
+        id: 'good',
+        name: 'Good Bag',
+        emoji: '🎒',
+        price: 15,
+        quality: 3,
+        durability: '2 years',
+        features: '4 pockets',
+        isBestValue: true
+      },
+      {
+        id: 'fancy',
+        name: 'Fancy Bag',
+        emoji: '👜',
+        price: 40,
+        quality: 5,
+        durability: '5 years',
+        features: '10 pockets',
+        isBestValue: false
+      }
+    ]
+  },
+
+  // Week 3 - Regular choice
+  {
+    id: 3,
+    type: 'choice',
     emoji: '🎮',
     title: "NEW VIDEO GAME",
     description: "That game you've been waiting for just came out! Everyone's playing it.",
@@ -97,8 +143,52 @@ export const scenarios = [
       }
     ]
   },
+
+  // Week 4 - VALUE PICKER
   {
-    id: 3,
+    id: 4,
+    type: 'value-picker',
+    emoji: '👟',
+    title: 'Time for New Shoes!',
+    description: 'Your old shoes have holes. Which ones should you get?',
+    products: [
+      {
+        id: 'cheap',
+        name: 'Bargain Shoes',
+        emoji: '👟',
+        price: 8,
+        quality: 1,
+        durability: '2 months',
+        features: 'Basic design',
+        isBestValue: false
+      },
+      {
+        id: 'good',
+        name: 'Quality Sneakers',
+        emoji: '👟',
+        price: 25,
+        quality: 4,
+        durability: '1 year',
+        features: 'Comfy + durable',
+        isBestValue: true
+      },
+      {
+        id: 'fancy',
+        name: 'Designer Kicks',
+        emoji: '👠',
+        price: 80,
+        quality: 5,
+        durability: '3 years',
+        features: 'Super stylish',
+        isBestValue: false
+      }
+    ]
+  },
+
+  // Week 5 - Regular choice
+  {
+    id: 5,
+    type: 'choice',
     emoji: '🍕',
     title: "PIZZA NIGHT",
     description: "Your friends are ordering pizza for movie night at Jake's house.",
@@ -132,8 +222,52 @@ export const scenarios = [
       }
     ]
   },
+
+  // Week 6 - VALUE PICKER
   {
-    id: 4,
+    id: 6,
+    type: 'value-picker',
+    emoji: '🎧',
+    title: 'Pick Your Headphones!',
+    description: 'You want to listen to music. Which headphones are the best buy?',
+    products: [
+      {
+        id: 'cheap',
+        name: 'Dollar Store',
+        emoji: '🎧',
+        price: 3,
+        quality: 1,
+        durability: '1 month',
+        features: 'Breaks easily',
+        isBestValue: false
+      },
+      {
+        id: 'good',
+        name: 'Mid-Range',
+        emoji: '🎧',
+        price: 20,
+        quality: 3,
+        durability: '2 years',
+        features: 'Good sound',
+        isBestValue: true
+      },
+      {
+        id: 'fancy',
+        name: 'Pro Audio',
+        emoji: '🎧',
+        price: 100,
+        quality: 5,
+        durability: '5 years',
+        features: 'Amazing sound',
+        isBestValue: false
+      }
+    ]
+  },
+
+  // Week 7 - Regular choice
+  {
+    id: 7,
+    type: 'choice',
     emoji: '👟',
     title: "COOL SNEAKERS",
     description: "You see amazing sneakers at the mall. All your friends have them.",
@@ -180,8 +314,52 @@ export const scenarios = [
       }
     ]
   },
+
+  // Week 8 - VALUE PICKER
   {
-    id: 5,
+    id: 8,
+    type: 'value-picker',
+    emoji: '🖊️',
+    title: 'School Supplies Time!',
+    description: 'You need new pens for school. Which pack should you get?',
+    products: [
+      {
+        id: 'cheap',
+        name: 'Basic Pack',
+        emoji: '🖊️',
+        price: 1,
+        quality: 1,
+        durability: '2 weeks',
+        features: '3 pens, leak often',
+        isBestValue: false
+      },
+      {
+        id: 'good',
+        name: 'Quality Pack',
+        emoji: '🖊️',
+        price: 5,
+        quality: 4,
+        durability: '6 months',
+        features: '5 pens, smooth writing',
+        isBestValue: true
+      },
+      {
+        id: 'fancy',
+        name: 'Premium Set',
+        emoji: '✒️',
+        price: 25,
+        quality: 5,
+        durability: '2 years',
+        features: '3 fancy pens, refillable',
+        isBestValue: false
+      }
+    ]
+  },
+
+  // Week 9 - Regular choice
+  {
+    id: 9,
+    type: 'choice',
     emoji: '💼',
     title: "EXTRA CHORES",
     description: "Mom offers to pay you for helping clean out the garage this weekend.",
@@ -215,8 +393,52 @@ export const scenarios = [
       }
     ]
   },
+
+  // Week 10 - VALUE PICKER
   {
-    id: 6,
+    id: 10,
+    type: 'value-picker',
+    emoji: '🔋',
+    title: 'Phone Charger Needed!',
+    description: 'Your phone charger broke. Time for a new one!',
+    products: [
+      {
+        id: 'cheap',
+        name: 'Gas Station Cable',
+        emoji: '🔌',
+        price: 3,
+        quality: 1,
+        durability: '1 month',
+        features: 'Slow charging',
+        isBestValue: false
+      },
+      {
+        id: 'good',
+        name: 'Brand Cable',
+        emoji: '🔋',
+        price: 15,
+        quality: 4,
+        durability: '2 years',
+        features: 'Fast charging',
+        isBestValue: true
+      },
+      {
+        id: 'fancy',
+        name: 'Premium Wireless',
+        emoji: '⚡',
+        price: 50,
+        quality: 5,
+        durability: '5 years',
+        features: 'Wireless + fast',
+        isBestValue: false
+      }
+    ]
+  },
+
+  // Week 11 - Regular choice
+  {
+    id: 11,
+    type: 'choice',
     emoji: '🎬',
     title: "MOVIE PREMIERE",
     description: "The new Marvel movie is out! Your whole friend group is going tonight.",
@@ -263,8 +485,52 @@ export const scenarios = [
       }
     ]
   },
+
+  // Week 12 - VALUE PICKER
   {
-    id: 7,
+    id: 12,
+    type: 'value-picker',
+    emoji: '💧',
+    title: 'Water Bottle Shopping!',
+    description: 'You keep buying plastic bottles. Time for a reusable one?',
+    products: [
+      {
+        id: 'cheap',
+        name: 'Plastic Bottle',
+        emoji: '🥤',
+        price: 1,
+        quality: 1,
+        durability: '1 week',
+        features: 'Single use basically',
+        isBestValue: false
+      },
+      {
+        id: 'good',
+        name: 'Steel Bottle',
+        emoji: '💧',
+        price: 15,
+        quality: 4,
+        durability: '3 years',
+        features: 'Keeps drinks cold',
+        isBestValue: true
+      },
+      {
+        id: 'fancy',
+        name: 'Smart Bottle',
+        emoji: '🌟',
+        price: 60,
+        quality: 5,
+        durability: '5 years',
+        features: 'Tracks hydration',
+        isBestValue: false
+      }
+    ]
+  },
+
+  // Week 13 - Regular choice
+  {
+    id: 13,
+    type: 'choice',
     emoji: '📱',
     title: "CRACKED CASE",
     description: "Your phone case is cracked and barely protecting your phone.",
@@ -311,8 +577,11 @@ export const scenarios = [
       }
     ]
   },
+
+  // Week 14 - Regular choice
   {
-    id: 8,
+    id: 14,
+    type: 'choice',
     emoji: '🎸',
     title: "GUITAR LESSONS",
     description: "The community center is offering guitar lessons. You've always wanted to learn!",
@@ -359,8 +628,11 @@ export const scenarios = [
       }
     ]
   },
+
+  // Week 15 - Regular choice
   {
-    id: 9,
+    id: 15,
+    type: 'choice',
     emoji: '🧋',
     title: "BOBA CRAVING",
     description: "You walk past the boba shop and it smells amazing. You have boba stuff at home though.",
@@ -394,8 +666,11 @@ export const scenarios = [
       }
     ]
   },
+
+  // Week 16 - Regular choice
   {
-    id: 10,
+    id: 16,
+    type: 'choice',
     emoji: '🎰',
     title: "ARCADE DAY",
     description: "There's a new arcade in town and everyone's going this weekend!",

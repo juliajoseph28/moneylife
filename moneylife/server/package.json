@@ -7,7 +7,8 @@
   "scripts": {
   "dev": "cd client && npm run dev",
   "build": "cd client && npm run build",
-  "preview": "cd client && npm run preview"
+  "preview": "cd client && npm run preview",
+  "test": "echo \"Error: no test specified\" && exit 1"
 },
   "repository": {
     "type": "git",
