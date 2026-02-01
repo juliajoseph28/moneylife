@@ -414,17 +414,6 @@ onMounted(() => {
   }, 5000)
 })
 
-// Optional: Filter goals so they see more expensive stuff in Level 2
-const goals = computed(() => {
-  const allPossibleGoals = selectedAge.value === 'kids' ? kidsGoals : teenGoals;
-  
-  if (store.level >= 2) {
-    // Show items that cost more than $30 for Level 2
-    return allPossibleGoals.filter(g => g.cost > 30);
-  }
-  return allPossibleGoals;
-})
-
 
 const kidsCharacters = [
   { 

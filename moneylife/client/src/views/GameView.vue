@@ -109,10 +109,7 @@
         />
         
         <!-- Empty state -->
-        <div v-else-if="!gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp" class="loading-state">
-          <span class="loading-emoji">🎮</span>
-          <p>Loading next scenario...</p>
-        </div>
+        
       </main>
       
       <!-- Right Sidebar - Goal & Progress -->
@@ -401,8 +398,7 @@ const handleNext = () => {
   advanceGame();
 }
 
-import { useRouter } from 'vue-router'
-const router = useRouter()
+
 
 const handleLevelUpClose = () => {
   gameState.dismissLevelUp();
