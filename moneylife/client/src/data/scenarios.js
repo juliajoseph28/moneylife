@@ -7,7 +7,7 @@ export const scenarios = [
     type: 'choice',
     emoji: '🎂',
     title: "FRIEND'S BIRTHDAY",
-    description: "Your best friend is throwing a birthday party! They're having dinner at a restaurant.",
+    description: "Your best friend is turning 15! They're having dinner at a restaurant.",
     prompt: "Wanna come? It's $25",
     choices: [
       { 
@@ -52,7 +52,7 @@ export const scenarios = [
     ]
   },
 
-  // Week 2 - VALUE PICKER (NEW!)
+  // Week 2 - VALUE PICKER
   {
     id: 2,
     type: 'value-picker',
@@ -144,45 +144,23 @@ export const scenarios = [
     ]
   },
 
-  // Week 4 - VALUE PICKER
+  // Week 4 - DEAL DETECTOR (Fake Deal)
   {
     id: 4,
-    type: 'value-picker',
-    emoji: '👟',
-    title: 'Time for New Shoes!',
-    description: 'Your old shoes have holes. Which ones should you get?',
-    products: [
-      {
-        id: 'cheap',
-        name: 'Bargain Shoes',
-        emoji: '👟',
-        price: 8,
-        quality: 1,
-        durability: '2 months',
-        features: 'Basic design',
-        isBestValue: false
-      },
-      {
-        id: 'good',
-        name: 'Quality Sneakers',
-        emoji: '👟',
-        price: 25,
-        quality: 4,
-        durability: '1 year',
-        features: 'Comfy + durable',
-        isBestValue: true
-      },
-      {
-        id: 'fancy',
-        name: 'Designer Kicks',
-        emoji: '👠',
-        price: 80,
-        quality: 5,
-        durability: '3 years',
-        features: 'Super stylish',
-        isBestValue: false
-      }
-    ]
+    type: 'deal-detector',
+    emoji: '🎸',
+    productName: 'Cool Guitar',
+    description: 'You see a guitar on sale at the music store!',
+    originalPrice: 100,
+    salePrice: 75,
+    salePercent: 25,
+    storeName: 'Music MegaStore',
+    realPrice: 60,
+    otherStoreName: 'Guitar Center',
+    otherStoreNote: 'Everyday price',
+    onlinePrice: 55,
+    onlineNote: 'Free shipping',
+    lesson: 'Stores often show a fake "original price" to make the sale look better. ALWAYS compare prices at other stores and online before buying!'
   },
 
   // Week 5 - Regular choice
@@ -227,38 +205,38 @@ export const scenarios = [
   {
     id: 6,
     type: 'value-picker',
-    emoji: '🎧',
-    title: 'Pick Your Headphones!',
-    description: 'You want to listen to music. Which headphones are the best buy?',
+    emoji: '👟',
+    title: 'Time for New Shoes!',
+    description: 'Your old shoes have holes. Which ones should you get?',
     products: [
       {
         id: 'cheap',
-        name: 'Dollar Store',
-        emoji: '🎧',
-        price: 3,
+        name: 'Bargain Shoes',
+        emoji: '👟',
+        price: 8,
         quality: 1,
-        durability: '1 month',
-        features: 'Breaks easily',
+        durability: '2 months',
+        features: 'Basic design',
         isBestValue: false
       },
       {
         id: 'good',
-        name: 'Mid-Range',
-        emoji: '🎧',
-        price: 20,
-        quality: 3,
-        durability: '2 years',
-        features: 'Good sound',
+        name: 'Quality Sneakers',
+        emoji: '👟',
+        price: 25,
+        quality: 4,
+        durability: '1 year',
+        features: 'Comfy + durable',
         isBestValue: true
       },
       {
         id: 'fancy',
-        name: 'Pro Audio',
-        emoji: '🎧',
-        price: 100,
+        name: 'Designer Kicks',
+        emoji: '👠',
+        price: 80,
         quality: 5,
-        durability: '5 years',
-        features: 'Amazing sound',
+        durability: '3 years',
+        features: 'Super stylish',
         isBestValue: false
       }
     ]
@@ -267,98 +245,6 @@ export const scenarios = [
   // Week 7 - Regular choice
   {
     id: 7,
-    type: 'choice',
-    emoji: '👟',
-    title: "COOL SNEAKERS",
-    description: "You see amazing sneakers at the mall. All your friends have them.",
-    prompt: "They cost $85. Your old shoes are fine though...",
-    choices: [
-      { 
-        id: 'a',
-        emoji: '💸',
-        text: "Gotta have them!", 
-        cost: 85,
-        effects: { balance: -85, health: 10 },
-        outcome: {
-          type: 'tradeoff',
-          title: 'Fresh kicks!',
-          message: 'You look great, but that was a big chunk of your savings!',
-          tip: 'Ask yourself: "Do I NEED this or WANT this?" Wants can wait!'
-        }
-      },
-      { 
-        id: 'b',
-        emoji: '📸',
-        text: "Take a pic, save up", 
-        cost: 0,
-        effects: { balance: 0, health: -5 },
-        outcome: {
-          type: 'positive',
-          title: 'Wish list!',
-          message: 'You added them to your wish list. Maybe for your birthday?',
-          tip: 'Creating a wish list helps you prioritize what you really want!'
-        }
-      },
-      { 
-        id: 'c',
-        emoji: '🚶',
-        text: "My shoes are fine", 
-        cost: 0,
-        effects: { balance: 0, health: -5 },
-        outcome: {
-          type: 'positive',
-          title: 'Confident choice!',
-          message: "You realized you don't need new shoes to be cool!",
-          tip: "True style is confidence, not expensive clothes!"
-        }
-      }
-    ]
-  },
-
-  // Week 8 - VALUE PICKER
-  {
-    id: 8,
-    type: 'value-picker',
-    emoji: '🖊️',
-    title: 'School Supplies Time!',
-    description: 'You need new pens for school. Which pack should you get?',
-    products: [
-      {
-        id: 'cheap',
-        name: 'Basic Pack',
-        emoji: '🖊️',
-        price: 1,
-        quality: 1,
-        durability: '2 weeks',
-        features: '3 pens, leak often',
-        isBestValue: false
-      },
-      {
-        id: 'good',
-        name: 'Quality Pack',
-        emoji: '🖊️',
-        price: 5,
-        quality: 4,
-        durability: '6 months',
-        features: '5 pens, smooth writing',
-        isBestValue: true
-      },
-      {
-        id: 'fancy',
-        name: 'Premium Set',
-        emoji: '✒️',
-        price: 25,
-        quality: 5,
-        durability: '2 years',
-        features: '3 fancy pens, refillable',
-        isBestValue: false
-      }
-    ]
-  },
-
-  // Week 9 - Regular choice
-  {
-    id: 9,
     type: 'choice',
     emoji: '💼',
     title: "EXTRA CHORES",
@@ -394,50 +280,28 @@ export const scenarios = [
     ]
   },
 
-  // Week 10 - VALUE PICKER
+  // Week 8 - DEAL DETECTOR (Fake Deal)
   {
-    id: 10,
-    type: 'value-picker',
-    emoji: '🔋',
-    title: 'Phone Charger Needed!',
-    description: 'Your phone charger broke. Time for a new one!',
-    products: [
-      {
-        id: 'cheap',
-        name: 'Gas Station Cable',
-        emoji: '🔌',
-        price: 3,
-        quality: 1,
-        durability: '1 month',
-        features: 'Slow charging',
-        isBestValue: false
-      },
-      {
-        id: 'good',
-        name: 'Brand Cable',
-        emoji: '🔋',
-        price: 15,
-        quality: 4,
-        durability: '2 years',
-        features: 'Fast charging',
-        isBestValue: true
-      },
-      {
-        id: 'fancy',
-        name: 'Premium Wireless',
-        emoji: '⚡',
-        price: 50,
-        quality: 5,
-        durability: '5 years',
-        features: 'Wireless + fast',
-        isBestValue: false
-      }
-    ]
+    id: 8,
+    type: 'deal-detector',
+    emoji: '👟',
+    productName: 'Trendy Sneakers',
+    description: 'Shoe store has a big "CLEARANCE" sign!',
+    originalPrice: 120,
+    salePrice: 89,
+    salePercent: 26,
+    storeName: 'Foot Palace',
+    realPrice: 75,
+    otherStoreName: 'Shoe Warehouse',
+    otherStoreNote: 'Same exact shoes',
+    onlinePrice: 70,
+    onlineNote: 'With code SAVE10',
+    lesson: '"Clearance" and "Sale" signs are designed to make you buy quickly without thinking. Take your time and compare prices - you might find the same thing cheaper elsewhere!'
   },
 
-  // Week 11 - Regular choice
+  // Week 9 - Regular choice
   {
-    id: 11,
+    id: 9,
     type: 'choice',
     emoji: '🎬',
     title: "MOVIE PREMIERE",
@@ -486,45 +350,102 @@ export const scenarios = [
     ]
   },
 
-  // Week 12 - VALUE PICKER
+  // Week 10 - VALUE PICKER
   {
-    id: 12,
+    id: 10,
     type: 'value-picker',
-    emoji: '💧',
-    title: 'Water Bottle Shopping!',
-    description: 'You keep buying plastic bottles. Time for a reusable one?',
+    emoji: '🎧',
+    title: 'Pick Your Headphones!',
+    description: 'You want to listen to music. Which headphones are the best buy?',
     products: [
       {
         id: 'cheap',
-        name: 'Plastic Bottle',
-        emoji: '🥤',
-        price: 1,
+        name: 'Dollar Store',
+        emoji: '🎧',
+        price: 3,
         quality: 1,
-        durability: '1 week',
-        features: 'Single use basically',
+        durability: '1 month',
+        features: 'Breaks easily',
         isBestValue: false
       },
       {
         id: 'good',
-        name: 'Steel Bottle',
-        emoji: '💧',
-        price: 15,
-        quality: 4,
-        durability: '3 years',
-        features: 'Keeps drinks cold',
+        name: 'Mid-Range',
+        emoji: '🎧',
+        price: 20,
+        quality: 3,
+        durability: '2 years',
+        features: 'Good sound',
         isBestValue: true
       },
       {
         id: 'fancy',
-        name: 'Smart Bottle',
-        emoji: '🌟',
-        price: 60,
+        name: 'Pro Audio',
+        emoji: '🎧',
+        price: 100,
         quality: 5,
         durability: '5 years',
-        features: 'Tracks hydration',
+        features: 'Amazing sound',
         isBestValue: false
       }
     ]
+  },
+
+  // Week 11 - Regular choice
+  {
+    id: 11,
+    type: 'choice',
+    emoji: '🧋',
+    title: "BOBA CRAVING",
+    description: "You walk past the boba shop and it smells amazing. You have boba stuff at home though.",
+    prompt: "Large boba is $7. Get one?",
+    choices: [
+      { 
+        id: 'a',
+        emoji: '🤤',
+        text: "Treat myself!", 
+        cost: 7,
+        effects: { balance: -7, health: 5 },
+        outcome: {
+          type: 'tradeoff',
+          title: 'Sipping happiness!',
+          message: 'So delicious! But $7 bobas add up fast...',
+          tip: '$7 × 3 times a week = $84/month! That\'s $1,000 a year on boba!'
+        }
+      },
+      { 
+        id: 'b',
+        emoji: '🏠',
+        text: "Make it at home", 
+        cost: 0,
+        effects: { balance: 0, health: 5 },
+        outcome: {
+          type: 'positive',
+          title: 'Home barista!',
+          message: 'Your homemade boba hit the spot! And it was basically free.',
+          tip: 'Learning to make your favorites at home saves hundreds per year!'
+        }
+      }
+    ]
+  },
+
+  // Week 12 - DEAL DETECTOR (Real Deal!)
+  {
+    id: 12,
+    type: 'deal-detector',
+    emoji: '🎮',
+    productName: 'Video Game Controller',
+    description: 'Game store is having a weekend sale!',
+    originalPrice: 60,
+    salePrice: 35,
+    salePercent: 42,
+    storeName: 'GameStop',
+    realPrice: 50,
+    otherStoreName: 'Target',
+    otherStoreNote: 'Regular price',
+    onlinePrice: 45,
+    onlineNote: 'Amazon price',
+    lesson: 'Sometimes sales ARE real deals! This sale price of $35 is genuinely cheaper than everywhere else. The key is to ALWAYS check before assuming!'
   },
 
   // Week 13 - Regular choice
@@ -578,53 +499,43 @@ export const scenarios = [
     ]
   },
 
-  // Week 14 - Regular choice
+  // Week 14 - VALUE PICKER
   {
     id: 14,
-    type: 'choice',
-    emoji: '🎸',
-    title: "GUITAR LESSONS",
-    description: "The community center is offering guitar lessons. You've always wanted to learn!",
-    prompt: "Monthly fee is $40. Worth it?",
-    choices: [
-      { 
-        id: 'a',
-        emoji: '🎵',
-        text: "Sign me up!", 
-        cost: 40,
-        effects: { balance: -40, health: 20 },
-        outcome: {
-          type: 'positive',
-          title: 'Rock star in training!',
-          message: "You're learning a skill that lasts forever!",
-          tip: 'Investing in skills and education always pays off long-term!'
-        }
+    type: 'value-picker',
+    emoji: '🔋',
+    title: 'Phone Charger Needed!',
+    description: 'Your phone charger broke. Time for a new one!',
+    products: [
+      {
+        id: 'cheap',
+        name: 'Gas Station Cable',
+        emoji: '🔌',
+        price: 3,
+        quality: 1,
+        durability: '1 month',
+        features: 'Slow charging',
+        isBestValue: false
       },
-      { 
-        id: 'b',
-        emoji: '📺',
-        text: "Learn from YouTube", 
-        cost: 0,
-        effects: { balance: 0, health: 10 },
-        outcome: {
-          type: 'positive',
-          title: 'DIY learner!',
-          message: 'Free tutorials can teach you a lot! Self-discipline is key.',
-          tip: 'YouTube University is free! Use it for learning new skills.'
-        }
+      {
+        id: 'good',
+        name: 'Brand Cable',
+        emoji: '🔋',
+        price: 15,
+        quality: 4,
+        durability: '2 years',
+        features: 'Fast charging',
+        isBestValue: true
       },
-      { 
-        id: 'c',
-        emoji: '⏳',
-        text: "Maybe next month", 
-        cost: 0,
-        effects: { balance: 0, health: -5 },
-        outcome: {
-          type: 'negative',
-          title: 'Postponed dreams',
-          message: '"Next month" often becomes "never". Just saying!',
-          tip: "Don't delay things that make you happy. Time is also valuable!"
-        }
+      {
+        id: 'fancy',
+        name: 'Premium Wireless',
+        emoji: '⚡',
+        price: 50,
+        quality: 5,
+        durability: '5 years',
+        features: 'Wireless + fast',
+        isBestValue: false
       }
     ]
   },
@@ -632,44 +543,6 @@ export const scenarios = [
   // Week 15 - Regular choice
   {
     id: 15,
-    type: 'choice',
-    emoji: '🧋',
-    title: "BOBA CRAVING",
-    description: "You walk past the boba shop and it smells amazing. You have boba stuff at home though.",
-    prompt: "Large boba is $7. Get one?",
-    choices: [
-      { 
-        id: 'a',
-        emoji: '🤤',
-        text: "Treat myself!", 
-        cost: 7,
-        effects: { balance: -7, health: 5 },
-        outcome: {
-          type: 'tradeoff',
-          title: 'Sipping happiness!',
-          message: 'So delicious! But $7 bobas add up fast...',
-          tip: '$7 × 3 times a week = $84/month! That\'s $1,000 a year on boba!'
-        }
-      },
-      { 
-        id: 'b',
-        emoji: '🏠',
-        text: "Make it at home", 
-        cost: 0,
-        effects: { balance: 0, health: 5 },
-        outcome: {
-          type: 'positive',
-          title: 'Home barista!',
-          message: 'Your homemade boba hit the spot! And it was basically free.',
-          tip: 'Learning to make your favorites at home saves hundreds per year!'
-        }
-      }
-    ]
-  },
-
-  // Week 16 - Regular choice
-  {
-    id: 16,
     type: 'choice',
     emoji: '🎰',
     title: "ARCADE DAY",
@@ -703,5 +576,24 @@ export const scenarios = [
         }
       }
     ]
+  },
+
+  // Week 16 - DEAL DETECTOR (Fake Deal)
+  {
+    id: 16,
+    type: 'deal-detector',
+    emoji: '📱',
+    productName: 'Phone Case',
+    description: 'The mall kiosk is having a "GOING OUT OF BUSINESS" sale!',
+    originalPrice: 40,
+    salePrice: 25,
+    salePercent: 38,
+    storeName: 'Mall Kiosk',
+    realPrice: 15,
+    otherStoreName: 'Amazon',
+    otherStoreNote: 'Same case, Prime shipping',
+    onlinePrice: 12,
+    onlineNote: 'eBay seller',
+    lesson: '"Going out of business" sales are often fake! Some stores run these "sales" for months or even years. Always check online prices first - you\'ll usually find it cheaper!'
   }
 ]

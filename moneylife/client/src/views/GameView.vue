@@ -83,22 +83,29 @@
         </div>
       </aside>
       
-            <!-- Center - Main Game Area -->
+      <!-- Center - Main Game Area -->
       <main class="main-content">
-        <!-- Regular Game Card -->
+        <!-- Regular Choice Card -->
         <GameCard 
-          v-if="currentScenario && currentScenario.type !== 'value-picker' && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp"
+          v-if="currentScenario && (!currentScenario.type || currentScenario.type === 'choice') && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp"
           :scenario="currentScenario"
           @choice="handleChoice"
           @next="handleNext"
         />
         
-        <!-- Value Picker Card (NEW!) -->
+        <!-- Value Picker Card -->
         <ValuePickerCard
           v-else-if="currentScenario && currentScenario.type === 'value-picker' && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp"
           :scenario="currentScenario"
           @complete="handleValuePickerComplete"
           @skip="handleNext"
+        />
+        
+        <!-- Deal Detector Card -->
+        <DealDetectorCard
+          v-else-if="currentScenario && currentScenario.type === 'deal-detector' && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp"
+          :scenario="currentScenario"
+          @complete="handleDealDetectorComplete"
         />
         
         <!-- Empty state -->
@@ -162,11 +169,14 @@
       :challenge="gameState.currentChallenge"
       @complete="handleChallengeComplete"
     />
+    
+    <!-- Gemini Chatbox -->
     <GeminiChatbox
-     :show="showGeminiChat"
-     :initial-context="chatContext"
-     @close="showGeminiChat = false"
+      :show="showGeminiChat"
+      :initial-context="chatContext"
+      @close="showGeminiChat = false"
     />
+    
     <!-- Shop Quiz Popup -->
     <ShopQuizPopup
       :show="gameState.showShopQuiz"
@@ -188,9 +198,7 @@
       @close="showBadge = false"
     />
     
-    <!-- ============================================ -->
-    <!-- PENNY HELP POPUP - NEW! -->
-    <!-- ============================================ -->
+    <!-- Penny Help Popup -->
     <PennyHelp
       :show="showPennyHelp"
       :situation="currentSituation"
@@ -202,8 +210,6 @@
 </template>
 
 <script setup>
-// Add this with your other component imports
-import GeminiChatbox from '@/components/GeminiChatbox.vue'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { gameState, levels, skillDefinitions } from '@/stores/gameState'
@@ -213,12 +219,15 @@ import { scenarios } from '@/data/scenarios'
 // COMPONENT IMPORTS
 // ============================================
 import GameCard from '@/components/GameCard.vue'
+import ValuePickerCard from '@/components/ValuePickerCard.vue'
+import DealDetectorCard from '@/components/DealDetectorCard.vue'
 import ChallengePopup from '@/components/ChallengePopup.vue'
 import ShopQuizPopup from '@/components/ShopQuizPopup.vue'
 import LevelUpPopup from '@/components/LevelUpPopup.vue'
 import BadgePopup from '@/components/BadgePopup.vue'
-import PennyHelp from '@/components/PennyHelp.vue'  // <-- NEW IMPORT
-import ValuePickerCard from '@/components/ValuePickerCard.vue'
+import PennyHelp from '@/components/PennyHelp.vue'
+import GeminiChatbox from '@/components/GeminiChatbox.vue'
+
 // ============================================
 // IMAGE IMPORTS
 // ============================================
@@ -231,16 +240,11 @@ const router = useRouter()
 // ============================================
 // STATE / REFS
 // ============================================
-
-// Existing state
 const showBadge = ref(false)
 const earnedBadge = ref(null)
 const scenarioIndex = ref(0)
-// Gemini Chat state
 const showGeminiChat = ref(false)
 const chatContext = ref('')
-
-// NEW: Penny Help state
 const showPennyHelp = ref(false)
 const currentSituation = ref('struggling')
 const lastHelpWeek = ref(0)
@@ -248,8 +252,6 @@ const lastHelpWeek = ref(0)
 // ============================================
 // COMPUTED PROPERTIES
 // ============================================
-
-// Tips that Penny can say
 const pennyTips = [
   "Save a little each week and watch it grow! 🌱",
   "Think before you spend - do you really need it? 🤔",
@@ -264,17 +266,14 @@ const currentTip = computed(() => {
   return pennyTips[gameState.week % pennyTips.length]
 })
 
-// Current level
 const currentLevel = computed(() => {
   return levels.find(l => l.id === gameState.currentLevel) || levels[0]
 })
 
-// Progress percent
 const progressPercent = computed(() => {
   return Math.min(100, Math.max(0, Math.round((gameState.balance / gameState.goal) * 100)))
 })
 
-// Weeks to goal
 const weeksToGoal = computed(() => {
   const remaining = gameState.goal - gameState.balance
   if (remaining <= 0) return 0
@@ -282,7 +281,6 @@ const weeksToGoal = computed(() => {
   return Math.ceil(remaining / weeklyNet)
 })
 
-// Goal image
 const goalImage = computed(() => {
   const goalName = gameState.selectedGoal?.name?.toLowerCase() || ''
   if (goalName.includes('toy')) return toyImage
@@ -291,7 +289,6 @@ const goalImage = computed(() => {
   return toyImage
 })
 
-// Current scenario
 const currentScenario = computed(() => {
   if (!scenarios || scenarios.length === 0) return null
   return scenarios[scenarioIndex.value % scenarios.length]
@@ -300,41 +297,32 @@ const currentScenario = computed(() => {
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
-
 const getSkillIcon = (key) => skillDefinitions[key]?.icon || '⭐'
 const getSkillName = (key) => skillDefinitions[key]?.name || key
 const getSkillColor = (key) => skillDefinitions[key]?.color || '#6C63FF'
 
 // ============================================
-// NEW: PENNY HELP DETECTION FUNCTIONS
+// PENNY HELP DETECTION
 // ============================================
-
 const detectSituation = () => {
   const { balance, goal, health, totalSaved, totalSpent, savingChoices, spendingChoices, week } = gameState
   
-  // Priority order - check most serious situations first
-  
-  // 1. In debt (negative balance)
   if (balance < 0) {
     return { situation: 'debt', shouldShow: true }
   }
   
-  // 2. Very low balance
   if (balance > 0 && balance < gameState.weeklyIncome * 0.3 && week > 2) {
     return { situation: 'low_balance', shouldShow: true }
   }
   
-  // 3. Low happiness
   if (health < 25) {
     return { situation: 'low_happiness', shouldShow: true }
   }
   
-  // 4. Spending spree
   if (totalSpent > totalSaved * 3 && spendingChoices > 3) {
     return { situation: 'spending_spree', shouldShow: true }
   }
   
-  // 5. Generally struggling
   const issues = []
   if (balance < goal * 0.1 && week > 3) issues.push('low_progress')
   if (spendingChoices > savingChoices && week > 2) issues.push('more_spending')
@@ -344,7 +332,6 @@ const detectSituation = () => {
     return { situation: 'struggling', shouldShow: true }
   }
   
-  // 6. Doing great! (occasional positive reinforcement)
   if (balance >= goal * 0.5 && health >= 60 && savingChoices >= spendingChoices) {
     return { situation: 'great_job', shouldShow: Math.random() < 0.2 }
   }
@@ -353,23 +340,14 @@ const detectSituation = () => {
 }
 
 const shouldCheckForHelp = () => {
-  // Don't show help too frequently (at least 2 weeks apart)
   if (gameState.week - lastHelpWeek.value < 2) return false
-  
-  // Always check when in debt
   if (gameState.balance < 0) return true
-  
-  // Always check when health is critical
   if (gameState.health < 20) return true
-  
-  // Check every 3 weeks normally
   if (gameState.week % 3 === 0) return true
-  
   return false
 }
 
 const checkForPennyHelp = () => {
-  // Don't interrupt other popups
   if (gameState.showChallenge || gameState.showShopQuiz || gameState.showLevelUp || showBadge.value) {
     return
   }
@@ -388,8 +366,6 @@ const checkForPennyHelp = () => {
 // ============================================
 // EVENT HANDLERS
 // ============================================
-
-// Handle choice with skill effects
 const handleChoice = (choice) => {
   if (choice.effects) {
     if (choice.effects.balance) {
@@ -411,68 +387,46 @@ const handleChoice = (choice) => {
   }
 }
 
-// Handle moving to next week
 const handleNext = () => {
-  // Add weekly income
   gameState.balance += gameState.weeklyIncome
   gameState.addSkill('responsibility', 1)
-  
-  // Advance week
   gameState.week++
   
-  // Check for level up first
   const leveledUp = gameState.checkLevelUp()
   if (leveledUp) return
   
-  // Check for shop quiz (every 4 weeks)
   if (gameState.maybeShowShopQuiz()) return
-  
-  // Check for challenge (every 3 weeks)
   if (gameState.maybeShowChallenge()) return
+  
   gameState.updateWeeklyHappinessStreaks()
-  // Check for badges
   checkForBadges()
-  
-  // ============================================
-  // NEW: Check if Penny should help
-  // ============================================
   checkForPennyHelp()
-  
-  // Advance game
   advanceGame()
 }
 
-// Handle level up close
 const handleLevelUpClose = () => {
   gameState.dismissLevelUp()
   checkForBadges()
   advanceGame()
 }
 
-// Handle challenge completion
 const handleChallengeComplete = (wasCorrect) => {
   gameState.completeChallenge(wasCorrect)
   checkForBadges()
   advanceGame()
 }
 
-// Handle shop quiz completion
 const handleShopQuizComplete = (wasCorrect, savedAmount) => {
   gameState.completeShopQuiz(wasCorrect, savedAmount)
   checkForBadges()
   advanceGame()
 }
 
-// ============================================
-// NEW: Penny Help Handlers
-// ============================================
-
 const handlePennyHelpClose = () => {
   showPennyHelp.value = false
 }
 
 const handlePennyHelped = () => {
-  // Reward for engaging with help
   gameState.addSkill('planning', 2)
 }
 
@@ -480,16 +434,21 @@ const handlePennyHelped = () => {
 // VALUE PICKER HANDLER
 // ============================================
 const handleValuePickerComplete = (result) => {
-  // Check for badges after value picker
   checkForBadges()
-  
-  // Advance to next scenario
   advanceGame()
 }
+
+// ============================================
+// DEAL DETECTOR HANDLER
+// ============================================
+const handleDealDetectorComplete = (result) => {
+  checkForBadges()
+  advanceGame()
+}
+
 // ============================================
 // BADGE & GAME PROGRESSION
 // ============================================
-
 const checkForBadges = () => {
   const newBadges = gameState.checkBadges()
   if (newBadges.length > 0) {
@@ -499,31 +458,26 @@ const checkForBadges = () => {
 }
 
 const advanceGame = () => {
-  // Check for game over conditions
   if (gameState.health <= 0) {
     router.push('/results')
     return
   }
   
-  // Check for too much debt
   if (gameState.balance < -50) {
     router.push('/results')
     return
   }
   
-  // Check for win
   if (gameState.balance >= gameState.goal) {
     router.push('/results')
     return
   }
   
-  // Check if played enough weeks
   if (gameState.week > 16) {
     router.push('/results')
     return
   }
   
-  // Next scenario
   scenarioIndex.value++
 }
 </script>
@@ -532,7 +486,6 @@ const advanceGame = () => {
 /* =====================
    BASE LAYOUT
    ===================== */
-
 .game-view {
   min-height: 100vh;
   background: linear-gradient(135deg, #87CEEB 0%, #E0F4FF 40%, #98D8AA 100%);
@@ -543,7 +496,6 @@ const advanceGame = () => {
 /* =====================
    HEADER
    ===================== */
-
 .game-header {
   display: flex;
   justify-content: space-between;
@@ -635,7 +587,6 @@ const advanceGame = () => {
 /* =====================
    MAIN LAYOUT
    ===================== */
-
 .game-layout {
   flex: 1;
   display: grid;
@@ -650,7 +601,6 @@ const advanceGame = () => {
 /* =====================
    SIDEBARS
    ===================== */
-
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -903,7 +853,6 @@ const advanceGame = () => {
 /* =====================
    MAIN CONTENT
    ===================== */
-
 .main-content {
   display: flex;
   align-items: flex-start;
@@ -933,7 +882,6 @@ const advanceGame = () => {
 /* =====================
    RESPONSIVE
    ===================== */
-
 @media (max-width: 1200px) {
   .game-layout {
     grid-template-columns: 1fr;
