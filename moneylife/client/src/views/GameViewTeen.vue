@@ -85,12 +85,98 @@
       
       <!-- Center - Main Game Area -->
       <main class="main-content">
+        <!-- Game Card (when scenario is active) -->
         <GameCard 
           v-if="currentScenario && !gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp"
           :scenario="currentScenario"
           @choice="handleChoice"
           @next="handleNext"
         />
+        
+        <!-- Three Financial Sections -->
+        <div class="financial-sections" v-if="!gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp">
+          
+          <!-- Credit Section -->
+          <div class="financial-card credit-card">
+            <div class="card-header">
+              <h3 class="card-title">💳 Credit</h3>
+              <div class="card-icon">💳</div>
+            </div>
+            <div class="card-content">
+              <div class="metric">
+                <span class="metric-label">Debt</span>
+                <span class="metric-value" :class="{ 'negative': gameState.creditCardDebt > 0 }">
+                  ${{ gameState.creditCardDebt }}
+                </span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Credit Score</span>
+                <span class="metric-value" :class="{ 
+                  'excellent': gameState.creditScore >= 750,
+                  'good': gameState.creditScore >= 650 && gameState.creditScore < 750,
+                  'fair': gameState.creditScore >= 550 && gameState.creditScore < 650,
+                  'poor': gameState.creditScore < 550
+                }">
+                  {{ gameState.creditScore }}
+                </span>
+              </div>
+              <div class="metric" v-if="gameState.creditCardDebt > 0">
+                <span class="metric-label">Min Payment</span>
+                <span class="metric-value">${{ gameState.creditCardMinPayment }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Investing Section -->
+          <div class="financial-card investing-card">
+            <div class="card-header">
+              <h3 class="card-title">📈 Investing</h3>
+              <div class="card-icon">📈</div>
+            </div>
+            <div class="card-content">
+              <div class="metric">
+                <span class="metric-label">Portfolio</span>
+                <span class="metric-value positive">${{ gameState.investmentPortfolio }}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Returns</span>
+                <span class="metric-value" :class="{ 
+                  'positive': gameState.investmentReturns > 0,
+                  'negative': gameState.investmentReturns < 0
+                }">
+                  {{ gameState.investmentReturns > 0 ? '+' : '' }}${{ gameState.investmentReturns }}
+                </span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Risk Level</span>
+                <span class="metric-value">{{ gameState.investmentRisk }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Emergency Funds Section -->
+          <div class="financial-card emergency-card">
+            <div class="card-header">
+              <h3 class="card-title">🛡️ Emergency Funds</h3>
+              <div class="card-icon">🛡️</div>
+            </div>
+            <div class="card-content">
+              <div class="metric">
+                <span class="metric-label">Available</span>
+                <span class="metric-value positive">${{ gameState.emergencyFund }}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Used</span>
+                <span class="metric-value">${{ gameState.emergencyFundUsed }}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Coverage</span>
+                <span class="metric-value">{{ Math.round((gameState.emergencyFund / gameState.weeklyIncome) * 4) }} weeks</span>
+              </div>
+            </div>
+          </div>
+          
+        </div>
         
         <!-- Empty state -->
         <div v-else-if="!gameState.showChallenge && !gameState.showShopQuiz && !gameState.showLevelUp" class="loading-state">
@@ -880,8 +966,111 @@ const advanceGame = () => {
 
 .main-content {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Financial Sections */
+.financial-sections {
+  display: flex;
+  gap: 20px;
+  width: 100%;
   justify-content: center;
+}
+
+.financial-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border: 3px solid #E8E8E8;
+  min-width: 200px;
+  flex: 1;
+  max-width: 300px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #2D3436;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+.card-icon {
+  font-size: 24px;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #FFF8F0;
+  border-radius: 10px;
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.metric-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2D3436;
+}
+
+.metric-value.positive {
+  color: #4ECDC4;
+}
+
+.metric-value.negative {
+  color: #FF6B6B;
+}
+
+.metric-value.excellent {
+  color: #4ECDC4;
+}
+
+.metric-value.good {
+  color: #FFD93D;
+}
+
+.metric-value.fair {
+  color: #FFB347;
+}
+
+.metric-value.poor {
+  color: #FF6B6B;
+}
+
+/* Card specific colors */
+.credit-card {
+  border-color: #667eea;
+}
+
+.investing-card {
+  border-color: #4ECDC4;
+}
+
+.emergency-card {
+  border-color: #FF6B9D;
 }
 
 .loading-state {
@@ -920,6 +1109,16 @@ const advanceGame = () => {
   
   .header-stats {
     display: none;
+  }
+  
+  .financial-sections {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .financial-card {
+    width: 100%;
+    max-width: 400px;
   }
 }
 
