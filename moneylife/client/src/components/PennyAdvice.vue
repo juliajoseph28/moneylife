@@ -62,7 +62,7 @@
         
         <!-- Need More Help Button -->
         <button @click="$emit('open-chat')" class="help-btn">
-          🐷 Need more help? Ask Penny AI 💬
+          🐷 Need more help? Ask Penny 💬
         </button>
         
       </div>

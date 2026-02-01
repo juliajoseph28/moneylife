@@ -104,7 +104,7 @@
       :weekly-income="weeklyIncome"
       :goal-name="goalName"
       :goal-cost="goalCost"
-      @close="closePennyAdvice"
+      @close="closePennyAdviceAndSkip"
       @choose-different="closePennyAdvice"
       @open-chat="openChatFromAdvice"
     />
@@ -227,6 +227,12 @@ const selectChoice = (choice) => {
 const closePennyAdvice = () => {
   showPennyAdvice.value = false
   attemptedChoice.value = null
+}
+
+const closePennyAdviceAndSkip = () => {
+  showPennyAdvice.value = false
+  attemptedChoice.value = null
+  emit('next')
 }
 
 const nextWeek = () => {
