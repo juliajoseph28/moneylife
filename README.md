@@ -21,7 +21,7 @@ MoneyLife is an engaging web-based game that simulates real-world financial deci
 ## 🛠️ Built With
 
 - **[Vite](https://vitejs.dev/)** - Next-generation frontend build tool for fast development
-- **React/Vue/Vanilla JS** - Modern JavaScript framework (update based on your stack)
+- **React/Vue/Vanilla JS** - Modern JavaScript framework 
 - **CSS/TailwindCSS** - Styling and responsive design
 - **Vercel** - Deployment and hosting platform
 
