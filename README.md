@@ -74,8 +74,6 @@ yarn build
 
 ## 🧩 Game Mechanics
 
-*(Add specific details about your game mechanics, such as:)*
-
 - Starting budget/salary
 - Decision categories (housing, transportation, food, entertainment, savings, investments)
 - Scoring system
